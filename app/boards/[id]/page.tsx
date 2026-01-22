@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { Filter, NewCard } from '@/types/types'
-import { Column as ColumnType, Card as CardType } from '@/lib/supabase/models'
+import { Column as ColumnType, Card as CardType, ColumnWithCards } from '@/lib/supabase/models'
 import { useParams } from 'next/navigation'
 import { useBoard } from '@/lib/hooks/useBoards'
 import { Button } from 'antd'
@@ -13,11 +13,26 @@ import BoardFiltersModal from '@/app/components/BoardFiltersModal'
 import Column from '@/app/components/Column'
 import Card from '@/app/components/Card'
 import ColumnEditionModal from '@/app/components/ColumnEditionModal'
+import { DndContext, DragOverlay, PointerSensor, rectIntersection, useSensor, useSensors } from '@dnd-kit/core'
+import { SortableContext } from '@dnd-kit/sortable'
+import { verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useDragAndDrop } from '@/lib/hooks/useDragAndDrop'
 
 export default function BoardPage() {
   const { id } = useParams<{ id: string }>()
   const boardId = Number(id)
-  const { board, columns, updateBoard, createCard, updateCard } = useBoard(boardId)
+  const {
+    board,
+    columns,
+    updateBoard,
+    setColumns,
+    createColumn,
+    deleteColumn,
+    updateColumn,
+    createCard,
+    updateCard,
+    moveCard
+  } = useBoard(boardId)
   const [isBoardEditing, setIsBoardEditing] = useState(false)
   const [isFiltering, setIsFiltering] = useState(false)
   const [filters, setFilters] = useState<Filter>({})
@@ -26,6 +41,8 @@ export default function BoardPage() {
   const [columnTargetId, setColumnTargetId] = useState<number | null>(null)
   const [isEditingColumn, setIsEditingColumn] = useState(false)
   const [columnToEdit, setColumnToEdit] = useState<ColumnType | null>(null)
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+  const { activeCard, handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop(columns, setColumns, moveCard)
 
   const handleUpdateBoard = async (title: string) => {
     if (!board || !title.trim()) return
@@ -50,6 +67,8 @@ export default function BoardPage() {
 
   const handleSubmitFilters = (filters: Filter) => {
     setFilters(filters)
+    // TODO: filter cards
+
     setIsFiltering(false)
   }
 
@@ -65,13 +84,15 @@ export default function BoardPage() {
     )
   }
 
-  const handleEditColumn = (column: ColumnType) => {
+  const handleEditColumn = (column: ColumnType | null) => {
     setColumnToEdit(column)
     setIsEditingColumn(true)
   }
 
-  const handleUpdateColumn = (column: ColumnType) => {
-    console.log(column)
+  const handleUpdateColumn = async (column: ColumnWithCards) => {
+    await updateColumn(column)
+    setIsEditingColumn(false)
+    setColumnToEdit(null)
   }
 
   const handleEditCard = (card: NewCard | CardType | null, columnId: number | null) => {
@@ -87,6 +108,20 @@ export default function BoardPage() {
     setIsAddingCard(false)
     setColumnTargetId(null)
     setCardToEdit(null)
+  }
+
+  const handleCreateColumn = async (title: string) => {
+    if (!title) return
+
+    await createColumn(title)
+    setIsEditingColumn(false)
+    setColumnToEdit(null)
+  }
+
+  const handleDeleteColumn = async (columnId: number) => {
+    await deleteColumn(columnId)
+    setIsEditingColumn(false)
+    setColumnToEdit(null)
   }
 
   const handleUpdateCard = async (card: CardType, columnId: number | null) => {
@@ -109,45 +144,72 @@ export default function BoardPage() {
 
       <main className="py-4 sm:py-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 space-x-4 sm:space-x-0 px-2 sm:px-4 ">
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 pb-2">
             <div className="text-sm text-gray-600">
               <span className="font-medium">Total cards: </span>
               <span>{columns?.reduce((count, column) => count + column.cards.length, 0)}</span>
             </div>
           </div>
-          <Button color="primary" variant="solid" onClick={() => handleEditCard(null, null)}>
-            <PlusOutlined />
-            Add Card
-          </Button>
+          <div className="pb-2">
+            <Button color="primary" variant="solid" onClick={() => handleEditCard(null, null)}>
+              <PlusOutlined />
+              Add Card
+            </Button>
+          </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 lg:[&::-webkit-scrollbar]:h2 lg:[&::-webkit-scrollbar-track]:bg-gray-300 lg:[&::-webkit-scrollbar-thumb]:rounded-xl lg:[&::-webkit-scrollbar-thumb]:bg-gray-400 space-y-4 lg:space-y-0 h-[calc(100vh-200px)]">
-          {columns?.map((column) => (
-            <Column
-              key={column.id}
-              column={column}
-              onCreateCard={() => handleEditCard(null, column.id)}
-              onEditColumn={() => handleEditColumn(column)}
-            >
-              <div className="space-y-3">
-                {column.cards.map((card) => (
-                  <Card
-                    key={card.id}
-                    card={card}
-                    onEditCard={(card: NewCard | CardType) => handleEditCard(card, column.id)}
-                  />
-                ))}
-              </div>
-            </Column>
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={rectIntersection}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div
+            id="board"
+            className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 lg:[&::-webkit-scrollbar]:h2 lg:[&::-webkit-scrollbar-track]:bg-gray-300 lg:[&::-webkit-scrollbar-thumb]:rounded-xl lg:[&::-webkit-scrollbar-thumb]:bg-gray-400 space-y-4 lg:space-y-0 h-[calc(100vh-200px)]"
+          >
+            {columns?.map((column) => (
+              <Column
+                key={column.id}
+                column={column}
+                onCreateCard={() => handleEditCard(null, column.id)}
+                onEditColumn={() => handleEditColumn(column)}
+              >
+                <SortableContext items={column.cards.map((card) => card.id)} strategy={verticalListSortingStrategy}>
+                  {column.cards.map((card) => (
+                    <Card
+                      key={card.id}
+                      card={card}
+                      onEditCard={(card: NewCard | CardType) => handleEditCard(card, column.id)}
+                    />
+                  ))}
+                </SortableContext>
+              </Column>
+            ))}
+
+            <div className="grid grid-cols-1 w-full lg:shrink-0 lg:w-80 pt-1">
+              <button
+                className="h-33 w-full cursor-pointer border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-gray-600 hover:text-primary-500 hover:border-primary-500 transition-colors"
+                onClick={() => handleEditColumn(null)}
+              >
+                <PlusOutlined className="text-xl mr-2" />
+                Add Column
+              </button>
+            </div>
+          </div>
+
+          <DragOverlay>{activeCard && <Card card={activeCard} onEditCard={() => {}} />}</DragOverlay>
+        </DndContext>
       </main>
 
       <ColumnEditionModal
         isOpen={isEditingColumn}
         column={columnToEdit}
         onClose={() => setIsEditingColumn(false)}
-        onSubmit={(column) => handleUpdateColumn(column)}
+        onSave={(title) => handleCreateColumn(title)}
+        onEdit={(column) => handleUpdateColumn(column)}
+        onDeleteColumn={(columnId) => handleDeleteColumn(columnId)}
       />
 
       <CardEditionModal

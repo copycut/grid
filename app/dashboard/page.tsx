@@ -8,18 +8,32 @@ import DashboardFilters from '@/app/components/DashboardFilters'
 import DashboardCreateBoard from '@/app/components/DashboardCreateBoard'
 import DashboardGridItem from '@/app/components/DashboardGridItem'
 import DashboardListItem from '@/app/components/DashboardListItem'
+import BoardDeleteModal from '@/app/components/BoardDeleteModal'
 
 export default function DashboardPage() {
   const { user } = useUser()
-  const { loadBoards, createBoard, boards, loading } = useBoards()
+  const { loadBoards, createBoard, boards, loading, deleteBoard } = useBoards()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [isBoardDeletion, setIsBoardDeletion] = useState(false)
+  const [boardIdToDelete, setBoardIdToDelete] = useState<number | null>(null)
 
   useEffect(() => {
     loadBoards()
   }, [])
 
+  const handleBoardToDelete = (boardID: number) => {
+    setBoardIdToDelete(boardID)
+    setIsBoardDeletion(true)
+  }
+
+  const handleDeleteBoard = async (boardId: number) => {
+    await deleteBoard(boardId)
+    setIsBoardDeletion(false)
+    setBoardIdToDelete(null)
+  }
+
   const handleCreateBoard = async () => {
-    const board = await createBoard({ title: 'New Board' })
+    await createBoard({ title: 'New Board' })
   }
 
   return (
@@ -52,7 +66,7 @@ export default function DashboardPage() {
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {boards.map((board) => (
-                <DashboardGridItem key={board.id} board={board} />
+                <DashboardGridItem key={board.id} board={board} onEditBoard={() => handleBoardToDelete(board.id)} />
               ))}
               <DashboardCreateBoard isGrid={true} handleCreateBoard={handleCreateBoard} />
             </div>
@@ -66,6 +80,13 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+
+      <BoardDeleteModal
+        isOpen={isBoardDeletion}
+        boardId={boardIdToDelete}
+        onClose={() => setIsBoardDeletion(false)}
+        onSubmit={handleDeleteBoard}
+      />
     </div>
   )
 }

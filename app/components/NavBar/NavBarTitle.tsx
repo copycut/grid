@@ -3,15 +3,17 @@ import Link from 'next/link'
 import { Button } from 'antd'
 
 export default function NavBarTitle({
+  isHomePage,
   isDashboard,
   boardTitle,
   onEditBoard
 }: {
+  isHomePage: boolean
   isDashboard: boolean
   boardTitle?: string
   onEditBoard?: () => void
 }) {
-  return isDashboard ? (
+  return isDashboard || isHomePage ? (
     <div className="flex items-center text-primary">
       <ProjectFilled className="text-2xl" />
       <div className="text-2xl font-bold pl-2 flex items-center space-x-2 text-gray-700 dark:text-white">
@@ -20,9 +22,9 @@ export default function NavBarTitle({
     </div>
   ) : (
     <div className="flex items-center text-primary">
-      <div className="flex items-center space-x-2 text-gray-500 hover:text-gray-900 hover:dark:text-gray-300 transition-colors">
-        <ArrowLeftOutlined className="text-lg" />
-        <Link href="/dashboard" className="text-sm shrink-0">
+      <div className=" text-gray-500 hover:text-gray-900 hover:dark:text-gray-300 transition-colors">
+        <Link href="/dashboard" className="flex items-center text-sm space-x-2">
+          <ArrowLeftOutlined className="text-lg" />
           <span className="hidden sm:inline font-medium">Back to dashboard</span>
         </Link>
       </div>

@@ -33,6 +33,11 @@ export const boardService = {
       .single()
     if (error) throw error
     return data
+  },
+
+  async deleteBoard(supabase: SupabaseClient, boardId: number) {
+    const { error } = await supabase.from('boards').delete().eq('id', boardId)
+    if (error) throw error
   }
 }
 
@@ -54,6 +59,17 @@ export const columnService = {
     const { data, error } = await supabase.from('columns').insert(column).select().single()
     if (error) throw error
     return data
+  },
+
+  async updateColumn(supabase: SupabaseClient, columnId: number, updates: Partial<Column>): Promise<Column> {
+    const { data, error } = await supabase.from('columns').update(updates).eq('id', columnId).select().single()
+    if (error) throw error
+    return data
+  },
+
+  async deleteColumn(supabase: SupabaseClient, columnId: number) {
+    const { error } = await supabase.from('columns').delete().eq('id', columnId)
+    if (error) throw error
   }
 }
 
@@ -90,6 +106,49 @@ export const cardService = {
       .single()
     if (error) throw error
     return data
+  },
+
+  async moveCard(supabase: SupabaseClient, cardId: number, newColumnId: number, newPosition: number) {
+    // Get the card being moved
+    const { data: movingCard } = await supabase.from('cards').select('column_id').eq('id', cardId).single()
+
+    if (!movingCard) throw new Error('Card not found')
+
+    const oldColumnId = movingCard.column_id
+
+    // Move the card
+    await supabase
+      .from('cards')
+      .update({ column_id: newColumnId, position: newPosition, updated_at: new Date().toISOString() })
+      .eq('id', cardId)
+
+    // Reorder cards in the new column
+    const { data: newColumnCards } = await supabase
+      .from('cards')
+      .select('id')
+      .eq('column_id', newColumnId)
+      .order('position')
+
+    if (newColumnCards) {
+      await Promise.all(
+        newColumnCards.map((card, index) => supabase.from('cards').update({ position: index }).eq('id', card.id))
+      )
+    }
+
+    // If moved to different column, reorder old column too
+    if (oldColumnId !== newColumnId) {
+      const { data: oldColumnCards } = await supabase
+        .from('cards')
+        .select('id')
+        .eq('column_id', oldColumnId)
+        .order('position')
+
+      if (oldColumnCards) {
+        await Promise.all(
+          oldColumnCards.map((card, index) => supabase.from('cards').update({ position: index }).eq('id', card.id))
+        )
+      }
+    }
   }
 }
 

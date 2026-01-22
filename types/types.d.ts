@@ -5,6 +5,6 @@ export interface Filter {
 export interface NewCard {
   title: string
   description?: string
-  priority?: 'default' | 'low' | 'medium' | 'high'
-  column_id?: number
+  priority: 'default' | 'low' | 'medium' | 'high'
+  column_id: number
 }

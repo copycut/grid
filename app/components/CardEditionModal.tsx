@@ -1,5 +1,5 @@
-import { Form, Input, Modal, Select } from 'antd'
-import { useEffect, useState } from 'react'
+import { Form, Input, InputRef, Modal, Select } from 'antd'
+import { useEffect, useRef, useState } from 'react'
 import { NewCard } from '@/types/types'
 import { Card as CardType, Column as ColumnType } from '@/lib/supabase/models'
 
@@ -30,13 +30,15 @@ export default function CardEditionModal({
     priority: 'default',
     column_id: 0
   })
+  const titleInputRef = useRef<InputRef>(null)
 
   useEffect(() => {
     if (isOpen) {
-      const cardData = card || {
-        title: '',
-        description: '',
-        priority: 'default',
+      const cardData = {
+        ...card,
+        title: card?.title || '',
+        description: card?.description || '',
+        priority: card?.priority || 'default',
         column_id: columnTargetId || columns[0]?.id
       }
       setNewCard(cardData)
@@ -46,6 +48,10 @@ export default function CardEditionModal({
         description: cardData.description,
         priority: cardData.priority
       })
+      // Use setTimeout to ensure the modal is fully rendered before focusing
+      setTimeout(() => {
+        titleInputRef.current?.focus()
+      }, 100)
     } else {
       createCardForm.resetFields()
     }
@@ -55,6 +61,7 @@ export default function CardEditionModal({
     <Modal
       title={card ? 'Edit Card' : 'New Card'}
       open={isOpen}
+      forceRender
       onOk={() =>
         card
           ? onEdit(editedCard as CardType, editedCard.column_id!)
@@ -64,16 +71,26 @@ export default function CardEditionModal({
       onCancel={onClose}
     >
       <Form form={createCardForm} layout="vertical">
-        <Form.Item label="Column" name="column_id" rules={[{ required: true, message: 'Please select a column' }]}>
-          <Select
-            options={columns.map((column) => ({ value: column.id, label: column.title }))}
-            value={editedCard.column_id}
-            onChange={(value) => setNewCard({ ...editedCard, column_id: value })}
-          />
-        </Form.Item>
+        <div className="grid grid-cols-2 gap-4">
+          <Form.Item label="Column" name="column_id" rules={[{ required: true, message: 'Please select a column' }]}>
+            <Select
+              options={columns.map((column) => ({ value: column.id, label: column.title }))}
+              value={editedCard.column_id}
+              onChange={(value) => setNewCard({ ...editedCard, column_id: value })}
+            />
+          </Form.Item>
+          <Form.Item label="Priority" name="priority">
+            <Select
+              options={filterOptions.priority}
+              value={editedCard.priority}
+              onChange={(value) => setNewCard({ ...editedCard, priority: value })}
+            />
+          </Form.Item>
+        </div>
 
         <Form.Item label="Title" name="title" rules={[{ required: true, message: 'Please enter a title' }]}>
           <Input
+            ref={titleInputRef}
             type="text"
             placeholder="Enter card title"
             value={editedCard?.title}
@@ -83,21 +100,20 @@ export default function CardEditionModal({
 
         <Form.Item label="Description" name="description">
           <TextArea
-            rows={4}
+            rows={6}
             placeholder="Enter card description"
             value={editedCard?.description}
             onChange={(e) => setNewCard({ ...editedCard, description: e.target.value })}
           />
         </Form.Item>
-
-        <Form.Item label="Priority" name="priority">
-          <Select
-            options={filterOptions.priority}
-            value={editedCard.priority}
-            onChange={(value) => setNewCard({ ...editedCard, priority: value })}
-          />
-        </Form.Item>
       </Form>
+
+      {card && 'created_at' in card && 'updated_at' in card && (
+        <p className="flex items-center justify-between space-x-2text-sm text-gray-500 pb-2">
+          <span>Created at {new Date(card.created_at).toLocaleDateString()}</span>
+          <span>Updated at {new Date(card.updated_at).toLocaleDateString()}</span>
+        </p>
+      )}
     </Modal>
   )
 }

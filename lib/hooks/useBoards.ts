@@ -1,4 +1,4 @@
-import { boardDataService, boardService, cardService } from '@/lib/services'
+import { boardDataService, boardService, columnService, cardService } from '@/lib/services'
 import { useUser } from '@clerk/clerk-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Board, ColumnWithCards, Card } from '@/lib/supabase/models'
@@ -46,7 +46,20 @@ export function useBoards() {
     }
   }
 
-  return { loading, error, createBoard, loadBoards, boards }
+  async function deleteBoard(boardId: number) {
+    try {
+      setLoading(true)
+      await boardService.deleteBoard(supabase!, boardId)
+      setBoards((prev) => prev.filter((board) => board.id !== boardId))
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to delete board')
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { loading, error, createBoard, loadBoards, boards, deleteBoard }
 }
 
 export function useBoard(boardId: number) {
@@ -85,6 +98,56 @@ export function useBoard(boardId: number) {
       return updatedBoard
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to update board')
+      throw error
+    }
+  }
+
+  async function createColumn(title: string) {
+    if (!boardId) throw new Error('Board not found')
+    try {
+      const newColumn = await columnService.createColumn(supabase!, {
+        title,
+        position: columns.length,
+        board_id: boardId
+      })
+      setColumns((prev: ColumnWithCards[]) => [...prev, { ...newColumn, cards: [] }])
+      return newColumn
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to create column')
+      throw error
+    }
+  }
+
+  async function updateColumn(columnData: ColumnWithCards) {
+    if (!boardId) throw new Error('Board not found')
+    try {
+      // Remove card from the column data before updating
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, cards, ...updates } = columnData
+
+      const updatedColumn = await columnService.updateColumn(supabase!, id, updates)
+      setColumns((prev: ColumnWithCards[]) =>
+        prev.map((column) => {
+          if (column.id === updatedColumn.id) {
+            return { ...updatedColumn, cards: column.cards || [] }
+          }
+          return column
+        })
+      )
+      return updatedColumn
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to update column')
+      throw error
+    }
+  }
+
+  async function deleteColumn(columnId: number) {
+    if (!boardId) throw new Error('Board not found')
+    try {
+      await columnService.deleteColumn(supabase!, columnId)
+      setColumns((prev) => prev.filter((column) => column.id !== columnId))
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to delete column')
       throw error
     }
   }
@@ -143,5 +206,72 @@ export function useBoard(boardId: number) {
     }
   }
 
-  return { loading, error, loadBoard, updateBoard, createCard, updateCard, board, columns }
+  async function moveCard(cardId: number, newColumnId: number, newPosition: number) {
+    try {
+      await cardService.moveCard(supabase!, cardId, newColumnId, newPosition)
+
+      setColumns((prev) => {
+        const newColumns = [...prev]
+        let cardToMove: Card | null = null
+        let oldColumnId: number | null = null
+
+        // Find and remove the card from its current column
+        for (const column of newColumns) {
+          const cardIndex = column.cards.findIndex((card) => card.id === cardId)
+          if (cardIndex !== -1) {
+            cardToMove = column.cards[cardIndex]
+            oldColumnId = column.id
+            column.cards.splice(cardIndex, 1)
+            break
+          }
+        }
+
+        // Add card to new column and update positions
+        if (cardToMove) {
+          const targetColumn = newColumns.find((column) => column.id === newColumnId)
+          if (targetColumn) {
+            cardToMove.column_id = newColumnId
+            cardToMove.position = newPosition
+            targetColumn.cards.splice(newPosition, 0, cardToMove)
+
+            // Renumber all cards in target column
+            targetColumn.cards.forEach((card, index) => {
+              card.position = index
+            })
+          }
+
+          // Renumber cards in old column if different
+          if (oldColumnId !== newColumnId) {
+            const oldColumn = newColumns.find((column) => column.id === oldColumnId)
+            if (oldColumn) {
+              oldColumn.cards.forEach((card, index) => {
+                card.position = index
+              })
+            }
+          }
+        }
+
+        return newColumns
+      })
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to move card')
+      throw error
+    }
+  }
+
+  return {
+    loading,
+    error,
+    loadBoard,
+    updateBoard,
+    createColumn,
+    updateColumn,
+    deleteColumn,
+    setColumns,
+    createCard,
+    updateCard,
+    moveCard,
+    board,
+    columns
+  }
 }

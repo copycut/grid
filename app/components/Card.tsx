@@ -2,6 +2,8 @@ import { Card as CardType } from '@/lib/supabase/models'
 import { NewCard } from '@/types/types'
 import { Tag } from 'antd'
 import { AlignLeftOutlined } from '@ant-design/icons'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 export default function Card({ card, onEditCard }: { card: CardType; onEditCard: (card: NewCard) => void }) {
   const priorityColors = {
@@ -11,12 +13,20 @@ export default function Card({ card, onEditCard }: { card: CardType; onEditCard:
     default: ''
   }
 
-  // Crop description to 2 lines
-  const croppedDescription = card.description?.split(' ').slice(0, 10).join(' ') + '...'
+  const { setNodeRef, listeners, attributes, transform, transition, isDragging } = useSortable({ id: card.id })
+  const styles = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1
+  }
 
   return (
     <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
       className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-gray-300 dark:border-neutral-700 cursor-pointer hover:shadow-lg transition-shadow"
+      style={styles}
       onClick={() => onEditCard(card)}
     >
       <div className="py-2 px-3">
@@ -27,9 +37,9 @@ export default function Card({ card, onEditCard }: { card: CardType; onEditCard:
           </Tag>
         </div>
         {card.description && (
-          <div className="flex items-center space-x-4 py-2">
-            <AlignLeftOutlined className="opacity-30" />
-            <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{croppedDescription}</div>
+          <div className="flex items-start space-x-4 py-2">
+            <AlignLeftOutlined className="opacity-30 mt-1" />
+            <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{card.description}</div>
           </div>
         )}
       </div>

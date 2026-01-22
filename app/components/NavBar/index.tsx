@@ -23,7 +23,12 @@ export default function NavBar({
   return (
     <header className="bg-white/70 dark:bg-neutral-900/70 border-b border-gray-200 dark:border-gray-800 backdrop-blur-sm sticky top-0 z-50">
       <div className="px-4 py-3 sm:py-4 flex items-center justify-between  text-secondary-500">
-        <NavBarTitle isDashboard={isDashboard} boardTitle={boardTitle} onEditBoard={onEditBoard} />
+        <NavBarTitle
+          isHomePage={isHomePage}
+          isDashboard={isDashboard}
+          boardTitle={boardTitle}
+          onEditBoard={onEditBoard}
+        />
         <div className="flex items-center space-x-2">
           <NavBarOptions
             isSignedIn={isSignedIn}
