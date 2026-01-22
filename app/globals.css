@@ -1,8 +1,23 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ededed;
+  --foreground: #21232f;
+}
+
+@theme {
+  --color-primary: #615cf2;
+  --color-primary-50: #f8f7ff;
+  --color-primary-100: #f5f3ff;
+  --color-primary-200: #ebe9ff;
+  --color-primary-300: #e0dfff;
+  --color-primary-400: #d5d3ff;
+  --color-primary-500: var(--color-primary);
+  --color-primary-600: #5751e0;
+  --color-primary-700: #4c48d6;
+  --color-primary-800: #413ec8;
+  --color-primary-900: #3635b0;
 }
 
 @theme inline {
@@ -14,7 +29,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #21232f;
     --foreground: #ededed;
   }
 }
@@ -22,5 +37,30 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    Roboto,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Open Sans',
+    'Helvetica Neue',
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+.text-mono {
+  font-family: var(--font-geist-mono);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-secondary);
 }
