@@ -3,7 +3,7 @@
 
 :root {
   --background: #ededed;
-  --foreground: #21232f;
+  --foreground: #191b24;
 }
 
 @theme {
@@ -29,7 +29,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #21232f;
+    --background: #191b24;
     --foreground: #ededed;
   }
 }

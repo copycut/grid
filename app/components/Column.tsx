@@ -20,7 +20,7 @@ export default function Column({
     <div className="w-full lg:shrink-0 lg:w-80 pt-1">
       <div
         ref={setNodeRef}
-        className={`${isOver ? 'ring-2 ring-primary-500' : ''} bg-white dark:bg-neutral-800 rounded-2xl shadow-sm border border-gray-300 dark:border-neutral-700 transition-all`}
+        className={`${isOver ? 'ring-2 ring-primary-500' : ''} bg-white dark:bg-black rounded-2xl shadow-sm border border-gray-300 dark:border-gray-700 transition-all`}
       >
         {/* Column header */}
         <div className="p-3 sm:p-4 border-b border-b-gray-300 dark:border-b-neutral-700">

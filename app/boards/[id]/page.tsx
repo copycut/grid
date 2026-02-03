@@ -17,6 +17,7 @@ import { DndContext, DragOverlay, PointerSensor, rectIntersection, useSensor, us
 import { SortableContext } from '@dnd-kit/sortable'
 import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDragAndDrop } from '@/lib/hooks/useDragAndDrop'
+import { AddColumnButton } from '@/app/components/AddColumnButton'
 
 export default function BoardPage() {
   const { id } = useParams<{ id: string }>()
@@ -188,15 +189,7 @@ export default function BoardPage() {
               </Column>
             ))}
 
-            <div className="grid grid-cols-1 w-full lg:shrink-0 lg:w-80 pt-1">
-              <button
-                className="h-33 w-full cursor-pointer border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-gray-600 hover:text-primary-500 hover:border-primary-500 transition-colors"
-                onClick={() => handleEditColumn(null)}
-              >
-                <PlusOutlined className="text-xl mr-2" />
-                Add Column
-              </button>
-            </div>
+            <AddColumnButton onAddColumn={() => handleEditColumn(null)} />
           </div>
 
           <DragOverlay>{activeCard && <Card card={activeCard} onEditCard={() => {}} />}</DragOverlay>

@@ -1,7 +1,7 @@
 'use client'
 import { useSession } from '@clerk/clerk-react'
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 type SupabaseContext = {
   supabase: SupabaseClient | null
@@ -11,28 +11,24 @@ type SupabaseContext = {
 const Context = createContext<SupabaseContext>({ supabase: null, isLoaded: false })
 
 export default function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  const { session } = useSession()
-  const [supabase, setSupabase] = useState<SupabaseClient | null>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
+  const { session, isLoaded: sessionLoaded } = useSession()
 
-  useEffect(() => {
-    if (!session) return
+  // Create supabase client only when we have a session
+  const supabase = useMemo(() => {
+    if (!sessionLoaded || !session) return null
 
-    const client = createClient(
+    return createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY as string,
       {
-        accessToken: async () => session?.getToken() ?? null
+        accessToken: async () => session.getToken() ?? null
       }
     )
+  }, [session?.id, sessionLoaded])
 
-    setSupabase(client)
-    setIsLoaded(true)
-  }, [session])
+  const value = useMemo(() => ({ supabase, isLoaded: sessionLoaded }), [supabase, sessionLoaded])
 
-  return (
-    <Context.Provider value={{ supabase, isLoaded }}>{!isLoaded ? <div>Loading...</div> : children}</Context.Provider>
-  )
+  return <Context.Provider value={value}>{!sessionLoaded ? <div>Loading...</div> : children}</Context.Provider>
 }
 
 export const useSupabase = () => {
