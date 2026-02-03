@@ -1,6 +1,6 @@
 import { Board } from '@/lib/supabase/models'
-import { Form, Input, Modal } from 'antd'
-import { useEffect, useState } from 'react'
+import { Form, Input, InputRef, Modal } from 'antd'
+import { useEffect, useRef, useState } from 'react'
 
 export default function BoardEditionModal({
   isOpen,
@@ -13,25 +13,45 @@ export default function BoardEditionModal({
   onClose: () => void
   onSubmit: (title: string) => void
 }) {
+  const [form] = Form.useForm()
   const [title, setTitle] = useState('')
+  const titleInputRef = useRef<InputRef>(null)
 
   useEffect(() => {
-    if (board) {
-      setTitle(board.title)
+    if (isOpen) {
+      setTimeout(() => {
+        titleInputRef.current?.focus()
+      }, 100)
+
+      if (board) {
+        setTitle(board.title)
+        form.setFieldsValue({ title: board.title })
+      }
+    } else {
+      setTitle('')
+      form.resetFields()
     }
-  }, [board])
+  }, [isOpen, board, form])
+
+  const handleSubmit = () => {
+    form.validateFields().then(() => {
+      if (title.trim()) {
+        onSubmit(title)
+      }
+    })
+  }
 
   return (
-    <Modal title="Edit Board Title" open={isOpen} onOk={() => onSubmit(title)} okText="Save" onCancel={onClose}>
-      <Form initialValues={{ boardTitle: title }}>
+    <Modal title="Edit Board Title" open={isOpen} onOk={handleSubmit} okText="Save" onCancel={onClose} forceRender>
+      <Form form={form} onFinish={handleSubmit}>
         <Form.Item
           hasFeedback
           label="Board title"
-          name="boardTitle"
+          name="title"
           validateFirst
           rules={[{ whitespace: true, required: true }]}
         >
-          <Input type="text" onChange={(e) => setTitle(e.target.value)} />
+          <Input ref={titleInputRef} type="text" onChange={(e) => setTitle(e.target.value)} />
         </Form.Item>
       </Form>
     </Modal>

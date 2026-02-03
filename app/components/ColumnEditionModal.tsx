@@ -25,40 +25,45 @@ export default function ColumnEditionModal({
 
   useEffect(() => {
     if (isOpen) {
-      // Use setTimeout to ensure the modal is fully rendered before focusing
       setTimeout(() => {
         titleInputRef.current?.focus()
       }, 100)
-    }
 
-    if (isOpen && column) {
-      setTitle(column.title)
-      columnForm.setFieldsValue({ title: column.title })
-    } else if (!isOpen) {
+      if (column) {
+        setTitle(column.title)
+        columnForm.setFieldsValue({ title: column.title })
+      }
+    } else {
       setTitle('')
       columnForm.resetFields()
     }
   }, [isOpen, column, columnForm])
 
+  const handleSubmit = () => {
+    columnForm.validateFields().then(() => {
+      if (title.trim()) {
+        column ? onEdit({ ...column, title, cards: 'cards' in column ? column.cards : [] }) : onSave(title.trim())
+      }
+    })
+  }
+
   return (
     <Modal
       title={column ? 'Edit Column' : 'New Column'}
       open={isOpen}
-      onOk={() =>
-        column ? onEdit({ ...column, title, cards: 'cards' in column ? column.cards : [] }) : onSave(title.trim())
-      }
+      onOk={handleSubmit}
       okText={column ? 'Save' : 'Add'}
       onCancel={onClose}
       forceRender
     >
-      <Form form={columnForm}>
+      <Form form={columnForm} onFinish={handleSubmit}>
         <Form.Item label="Column title" name="title" rules={[{ required: true, message: 'Please enter a title' }]}>
           <Input ref={titleInputRef} type="text" onChange={(e) => setTitle(e.target.value)} />
         </Form.Item>
       </Form>
 
       {column && 'created_at' in column && (
-        <p className="flex items-center justify-between space-x-2text-sm text-gray-500 pb-2">
+        <p className="flex items-center justify-between space-x-2 text-sm text-gray-500 pb-2">
           <span>Created at {new Date(column.created_at).toLocaleDateString()}</span>
 
           <Popconfirm

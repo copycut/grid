@@ -46,6 +46,17 @@ export function useBoards() {
     }
   }
 
+  async function updateBoard(boardId: number, updates: Partial<Board>) {
+    try {
+      const updatedBoard = await boardService.updateBoard(supabase!, boardId, updates)
+      setBoards((prev) => prev.map((board) => (board.id === updatedBoard.id ? updatedBoard : board)))
+      return updatedBoard
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to update board')
+      throw error
+    }
+  }
+
   async function deleteBoard(boardId: number) {
     try {
       setLoading(true)
@@ -59,7 +70,7 @@ export function useBoards() {
     }
   }
 
-  return { loading, error, createBoard, loadBoards, boards, deleteBoard }
+  return { loading, error, boards, createBoard, loadBoards, updateBoard, deleteBoard }
 }
 
 export function useBoard(boardId: number) {
@@ -280,6 +291,8 @@ export function useBoard(boardId: number) {
   return {
     loading,
     error,
+    board,
+    columns,
     loadBoard,
     updateBoard,
     createColumn,
@@ -289,8 +302,6 @@ export function useBoard(boardId: number) {
     createCard,
     updateCard,
     moveCard,
-    deleteCard,
-    board,
-    columns
+    deleteCard
   }
 }
