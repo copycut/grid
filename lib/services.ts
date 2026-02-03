@@ -149,6 +149,11 @@ export const cardService = {
         )
       }
     }
+  },
+
+  async deleteCard(supabase: SupabaseClient, cardId: number) {
+    const { error } = await supabase.from('cards').delete().eq('id', cardId)
+    if (error) throw error
   }
 }
 

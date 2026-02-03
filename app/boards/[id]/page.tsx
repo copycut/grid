@@ -18,6 +18,7 @@ import { SortableContext } from '@dnd-kit/sortable'
 import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDragAndDrop } from '@/lib/hooks/useDragAndDrop'
 import { AddColumnButton } from '@/app/components/AddColumnButton'
+import { useOptimisticColumns } from '@/lib/hooks/useOptimisticColumns'
 
 export default function BoardPage() {
   const { id } = useParams<{ id: string }>()
@@ -32,7 +33,8 @@ export default function BoardPage() {
     updateColumn,
     createCard,
     updateCard,
-    moveCard
+    moveCard,
+    deleteCard
   } = useBoard(boardId)
   const [isBoardEditing, setIsBoardEditing] = useState(false)
   const [isFiltering, setIsFiltering] = useState(false)
@@ -44,29 +46,7 @@ export default function BoardPage() {
   const [columnToEdit, setColumnToEdit] = useState<ColumnType | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
   const { activeCard, handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop(columns, setColumns, moveCard)
-
-  const [optimisticColumns, updateOptimisticColumns] = useOptimistic(
-    columns,
-    (currentColumns: ColumnWithCards[], action: { type: 'update' | 'create'; card: CardType }): ColumnWithCards[] => {
-      if (action.type === 'create') {
-        return currentColumns.map((column) => {
-          if (column.id === action.card.column_id) {
-            return { ...column, cards: [...column.cards, action.card] }
-          }
-          return column
-        })
-      }
-
-      return currentColumns.map((column) => {
-        const filteredCards = column.cards.filter((card) => card.id !== action.card.id)
-
-        if (column.id === action.card.column_id) {
-          return { ...column, cards: [...filteredCards, action.card] }
-        }
-        return { ...column, cards: filteredCards }
-      })
-    }
-  )
+  const { optimisticColumns, updateOptimisticColumns } = useOptimisticColumns(columns)
 
   const handleUpdateBoard = async (title: string) => {
     if (!board || !title.trim()) return
@@ -108,18 +88,69 @@ export default function BoardPage() {
     )
   }
 
-  const handleEditColumn = (column: ColumnType | null) => {
+  const handleEditColumnModal = (column: ColumnType | null) => {
     setColumnToEdit(column)
     setIsEditingColumn(true)
   }
 
-  const handleUpdateColumn = async (column: ColumnWithCards) => {
-    await updateColumn(column)
-    setIsEditingColumn(false)
-    setColumnToEdit(null)
+  const handleCreateColumn = async (title: string) => {
+    if (!title) return
+
+    const tempId = Date.now()
+    const optimisticColumn = {
+      id: tempId,
+      title,
+      position: columns.length,
+      board_id: boardId,
+      created_at: new Date().toISOString(),
+      cards: []
+    }
+
+    startTransition(() => {
+      updateOptimisticColumns({ type: 'createColumn', column: optimisticColumn })
+    })
+
+    try {
+      await createColumn(title)
+    } catch (error) {
+      console.error('Failed to create column:', error)
+    } finally {
+      setIsEditingColumn(false)
+      setColumnToEdit(null)
+    }
   }
 
-  const handleEditCard = (card: NewCard | CardType | null, columnId: number | null) => {
+  const handleUpdateColumn = async (column: ColumnWithCards) => {
+    startTransition(() => {
+      updateOptimisticColumns({ type: 'updateColumn', column })
+    })
+
+    try {
+      await updateColumn(column)
+    } catch (error) {
+      console.error('Failed to update column:', error)
+    } finally {
+      setIsEditingColumn(false)
+      setColumnToEdit(null)
+    }
+  }
+
+  const handleDeleteColumn = async (columnId: number) => {
+    startTransition(() => {
+      updateOptimisticColumns({ type: 'deleteColumn', columnId })
+    })
+
+    try {
+      await deleteColumn(columnId)
+    } catch (error) {
+      console.error('Failed to delete column:', error)
+    } finally {
+      setIsEditingColumn(false)
+      setColumnToEdit(null)
+    }
+  }
+
+  const handleEditCardModal = (card: NewCard | CardType | null, columnId: number | null) => {
     setCardToEdit(card)
     setColumnTargetId(columnId || columns[0].id)
     setIsAddingCard(true)
@@ -155,20 +186,6 @@ export default function BoardPage() {
     }
   }
 
-  const handleCreateColumn = async (title: string) => {
-    if (!title) return
-
-    await createColumn(title)
-    setIsEditingColumn(false)
-    setColumnToEdit(null)
-  }
-
-  const handleDeleteColumn = async (columnId: number) => {
-    await deleteColumn(columnId)
-    setIsEditingColumn(false)
-    setColumnToEdit(null)
-  }
-
   const handleUpdateCard = async (card: CardType, columnId: number | null) => {
     if (!card.title.trim()) return
 
@@ -182,6 +199,22 @@ export default function BoardPage() {
       await updateCard(card, targetColumnId)
     } catch (error) {
       console.error('Failed to update card:', error)
+    } finally {
+      setIsAddingCard(false)
+      setColumnTargetId(null)
+      setCardToEdit(null)
+    }
+  }
+
+  const handleDeleteCard = async (cardId: number) => {
+    startTransition(() => {
+      updateOptimisticColumns({ type: 'delete', cardId, card: {} as CardType })
+    })
+
+    try {
+      await deleteCard(cardId)
+    } catch (error) {
+      console.error('Failed to delete card:', error)
     } finally {
       setIsAddingCard(false)
       setColumnTargetId(null)
@@ -207,7 +240,7 @@ export default function BoardPage() {
             </div>
           </div>
           <div className="pb-2">
-            <Button color="primary" variant="solid" onClick={() => handleEditCard(null, null)}>
+            <Button color="primary" variant="solid" onClick={() => handleEditCardModal(null, null)}>
               <PlusOutlined />
               Add Card
             </Button>
@@ -229,22 +262,22 @@ export default function BoardPage() {
               <Column
                 key={column.id}
                 column={column}
-                onCreateCard={() => handleEditCard(null, column.id)}
-                onEditColumn={() => handleEditColumn(column)}
+                onCreateCard={() => handleEditCardModal(null, column.id)}
+                onEditColumn={() => handleEditColumnModal(column)}
               >
                 <SortableContext items={column.cards.map((card) => card.id)} strategy={verticalListSortingStrategy}>
                   {column.cards.map((card) => (
                     <Card
                       key={card.id}
                       card={card}
-                      onEditCard={(card: NewCard | CardType) => handleEditCard(card, column.id)}
+                      onEditCard={(card: NewCard | CardType) => handleEditCardModal(card, column.id)}
                     />
                   ))}
                 </SortableContext>
               </Column>
             ))}
 
-            <AddColumnButton onAddColumn={() => handleEditColumn(null)} />
+            <AddColumnButton onAddColumn={() => handleEditColumnModal(null)} />
           </div>
 
           <DragOverlay>{activeCard && <Card card={activeCard} onEditCard={() => {}} />}</DragOverlay>
@@ -269,6 +302,7 @@ export default function BoardPage() {
         onClose={() => setIsAddingCard(false)}
         onEdit={(newCard: CardType, columnId: number) => handleUpdateCard(newCard, columnId)}
         onSave={(newCard: NewCard, columnId: number) => handleCreateCard(newCard, columnId)}
+        onDelete={(cardId: number) => handleDeleteCard(cardId)}
       />
 
       <BoardEditionModal

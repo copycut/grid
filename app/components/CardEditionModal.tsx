@@ -1,4 +1,5 @@
-import { Form, Input, InputRef, Modal, Select } from 'antd'
+import { Button, Form, Input, InputRef, Modal, Popconfirm, Select } from 'antd'
+import { DeleteOutlined } from '@ant-design/icons'
 import { useEffect, useRef, useState } from 'react'
 import { NewCard } from '@/types/types'
 import { Card as CardType, Column as ColumnType } from '@/lib/supabase/models'
@@ -11,7 +12,8 @@ export default function CardEditionModal({
   filterOptions,
   onClose,
   onEdit,
-  onSave
+  onSave,
+  onDelete
 }: {
   isOpen: boolean
   columnTargetId: number | null | undefined
@@ -21,6 +23,7 @@ export default function CardEditionModal({
   onClose: () => void
   onEdit: (editedCard: CardType, columnId: number) => void
   onSave: (editedCard: NewCard, columnId: number) => void
+  onDelete: (cardId: number) => void
 }) {
   const [createCardForm] = Form.useForm()
   const { TextArea } = Input
@@ -108,12 +111,37 @@ export default function CardEditionModal({
         </Form.Item>
       </Form>
 
-      {card && 'created_at' in card && 'updated_at' in card && (
-        <p className="flex items-center justify-between space-x-2text-sm text-gray-500 pb-2">
-          <span>Created at {new Date(card.created_at).toLocaleDateString()}</span>
-          <span>Updated at {new Date(card.updated_at).toLocaleDateString()}</span>
-        </p>
-      )}
+      <div className="flex items-center justify-between space-x-2 text-gray-500 pb-2">
+        {card && 'created_at' in card && 'updated_at' in card && (
+          <p className="flex items-center justify-between space-x-2">
+            <span>
+              <span className="font-semibold">Created at </span>
+              {new Date(card.created_at).toLocaleDateString()}
+            </span>
+            <span>
+              <span className="font-semibold">Updated at </span>
+              {new Date(card.updated_at).toLocaleDateString()}
+            </span>
+          </p>
+        )}
+        {card && 'id' in card && (
+          <p className="flex items-center justify-between">
+            <Popconfirm
+              title="Delete the card"
+              description="Are you sure to delete this card? This action is irreversible."
+              onConfirm={() => onDelete(card.id)}
+              okText="Yes"
+              cancelText="No"
+              icon={<DeleteOutlined />}
+            >
+              <Button type="text" danger>
+                <DeleteOutlined />
+                Delete Card
+              </Button>
+            </Popconfirm>
+          </p>
+        )}
+      </div>
     </Modal>
   )
 }

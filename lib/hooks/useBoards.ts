@@ -259,6 +259,24 @@ export function useBoard(boardId: number) {
     }
   }
 
+  async function deleteCard(cardId: number) {
+    if (!boardId) throw new Error('Board not found')
+
+    try {
+      await cardService.deleteCard(supabase!, cardId)
+
+      setColumns((prev) =>
+        prev.map((column) => ({
+          ...column,
+          cards: column.cards.filter((card) => card.id !== cardId)
+        }))
+      )
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to delete card')
+      throw error
+    }
+  }
+
   return {
     loading,
     error,
@@ -271,6 +289,7 @@ export function useBoard(boardId: number) {
     createCard,
     updateCard,
     moveCard,
+    deleteCard,
     board,
     columns
   }
