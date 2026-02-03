@@ -62,11 +62,13 @@ export default function DashboardGridItem({
         hoverable
       >
         <div className="flex flex-col space-x-2 text-sm text-gray-500">
-          <div className="flex flex-nowrap items-center">
-            Created at {new Date(board.created_at).toLocaleDateString()}
+          <div className="flex flex-nowrap items-center space-x-1">
+            <span className="font-semibold">Created at </span>
+            <span>{new Date(board.created_at).toLocaleDateString()}</span>
           </div>
-          <div className="flex flex-nowrap items-center">
-            Updated at {new Date(board.updated_at).toLocaleDateString()}
+          <div className="flex flex-nowrap items-center space-x-1">
+            <span className="font-semibold">Updated at </span>
+            <span>{new Date(board.updated_at).toLocaleDateString()}</span>
           </div>
         </div>
       </Card>

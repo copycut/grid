@@ -33,6 +33,7 @@ export default function NavBar({
           <NavBarOptions
             isSignedIn={isSignedIn}
             isHomePage={isHomePage}
+            isDashboard={isDashboard}
             onFilter={onFilter}
             filterCount={filterCount}
           />

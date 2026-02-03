@@ -6,11 +6,13 @@ import { ArrowRightOutlined, FilterOutlined } from '@ant-design/icons'
 export default function NavBarOptions({
   isSignedIn,
   isHomePage,
+  isDashboard,
   onFilter,
   filterCount = 0
 }: {
   isSignedIn: boolean | undefined
   isHomePage: boolean
+  isDashboard: boolean
   onFilter?: () => void
   filterCount?: number
 }) {
@@ -31,6 +33,10 @@ export default function NavBarOptions({
     )
   }
 
+  if (isSignedIn && isDashboard) {
+    return <UserButton />
+  }
+
   if (isSignedIn) {
     return (
       <div className="flex items-center space-x-4">
@@ -41,7 +47,9 @@ export default function NavBarOptions({
         <UserButton />
       </div>
     )
-  } else {
+  }
+
+  if (!isSignedIn) {
     return (
       <div className="flex items-center space-x-2">
         <SignInButton>

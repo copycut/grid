@@ -19,11 +19,16 @@ export default function DashboardPage() {
   const { loadBoards, createBoard, boards, loading, deleteBoard, updateBoard } = useBoards()
   const { optimisticBoards, updateOptimisticBoards } = useOptimisticBoards(boards)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [searchQuery, setSearchQuery] = useState('')
   const [isBoardDeletion, setIsBoardDeletion] = useState(false)
   const [boardIdToDelete, setBoardIdToDelete] = useState<number | null>(null)
   const [isBoardEditing, setIsBoardEditing] = useState(false)
   const [boardToEdit, setBoardToEdit] = useState<Board | null>(null)
   const { notifySuccess, notifyError } = useNotification()
+
+  const filteredBoards = optimisticBoards.filter((board) =>
+    board.title.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   useEffect(() => {
     loadBoards()
@@ -114,25 +119,31 @@ export default function DashboardPage() {
             setViewMode={setViewMode}
             handleCreateBoard={handleCreateBoard}
             loading={loading}
+            searchQuery={searchQuery}
+            onSearch={setSearchQuery}
           />
 
-          {optimisticBoards.length < 1 && <div className="text-center text-gray-500">No Boards Found</div>}
+          {filteredBoards.length < 1 && (
+            <div className="text-center text-gray-500">
+              {searchQuery ? 'No boards match your search' : 'No Boards Found'}
+            </div>
+          )}
 
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {optimisticBoards.map((board) => (
+              {filteredBoards.map((board) => (
                 <DashboardGridItem
                   key={board.id}
                   board={board}
-                  onEditBoard={() => handleEditBoardModal(board.id)}
-                  onDeleteBoard={() => handleBoardToDeleteModal(board.id)}
+                  onEditBoard={handleEditBoardModal}
+                  onDeleteBoard={handleBoardToDeleteModal}
                 />
               ))}
               <DashboardCreateBoard isGrid={true} handleCreateBoard={handleCreateBoard} />
             </div>
           ) : (
             <div className="flex flex-col space-y-2 w-full">
-              {optimisticBoards.map((board) => (
+              {filteredBoards.map((board) => (
                 <DashboardListItem key={board.id} board={board} />
               ))}
               <DashboardCreateBoard isGrid={false} handleCreateBoard={handleCreateBoard} />

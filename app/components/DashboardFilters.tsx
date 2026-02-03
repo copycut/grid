@@ -6,12 +6,16 @@ export default function DashboardFilters({
   viewMode,
   setViewMode,
   handleCreateBoard,
-  loading
+  loading,
+  searchQuery,
+  onSearch
 }: {
   viewMode: 'grid' | 'list'
   setViewMode: (viewMode: 'grid' | 'list') => void
   handleCreateBoard: () => void
   loading: boolean
+  searchQuery: string
+  onSearch: (query: string) => void
 }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -29,6 +33,9 @@ export default function DashboardFilters({
             className="flex"
             prefix={<SearchOutlined className="text-neutral-400! dark:text-neutral-600!" />}
             placeholder="Search boards..."
+            value={searchQuery}
+            onChange={(e) => onSearch(e.target.value)}
+            allowClear
           />
         </div>
 
