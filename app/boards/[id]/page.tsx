@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useOptimistic, startTransition } from 'react'
 import { Filter, NewCard } from '@/types/types'
 import { Column as ColumnType, Card as CardType, ColumnWithCards } from '@/lib/supabase/models'
 import { useParams } from 'next/navigation'
@@ -44,6 +44,29 @@ export default function BoardPage() {
   const [columnToEdit, setColumnToEdit] = useState<ColumnType | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
   const { activeCard, handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop(columns, setColumns, moveCard)
+
+  const [optimisticColumns, updateOptimisticColumns] = useOptimistic(
+    columns,
+    (currentColumns: ColumnWithCards[], action: { type: 'update' | 'create'; card: CardType }): ColumnWithCards[] => {
+      if (action.type === 'create') {
+        return currentColumns.map((column) => {
+          if (column.id === action.card.column_id) {
+            return { ...column, cards: [...column.cards, action.card] }
+          }
+          return column
+        })
+      }
+
+      return currentColumns.map((column) => {
+        const filteredCards = column.cards.filter((card) => card.id !== action.card.id)
+
+        if (column.id === action.card.column_id) {
+          return { ...column, cards: [...filteredCards, action.card] }
+        }
+        return { ...column, cards: filteredCards }
+      })
+    }
+  )
 
   const handleUpdateBoard = async (title: string) => {
     if (!board || !title.trim()) return
@@ -105,10 +128,31 @@ export default function BoardPage() {
   const handleCreateCard = async (newCard: NewCard, columnId: number) => {
     if (!newCard.title.trim()) return
 
-    await createCard(newCard, columnId)
-    setIsAddingCard(false)
-    setColumnTargetId(null)
-    setCardToEdit(null)
+    const tempId = Date.now()
+    const optimisticCard = {
+      id: tempId,
+      title: newCard.title.trim(),
+      description: newCard.description || '',
+      priority: newCard.priority,
+      column_id: columnId,
+      position: columns.find((col) => col.id === columnId)?.cards.length || 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
+    startTransition(() => {
+      updateOptimisticColumns({ type: 'create', card: optimisticCard })
+    })
+
+    try {
+      await createCard(newCard, columnId)
+    } catch (error) {
+      console.error('Failed to create card:', error)
+    } finally {
+      setIsAddingCard(false)
+      setColumnTargetId(null)
+      setCardToEdit(null)
+    }
   }
 
   const handleCreateColumn = async (title: string) => {
@@ -128,10 +172,21 @@ export default function BoardPage() {
   const handleUpdateCard = async (card: CardType, columnId: number | null) => {
     if (!card.title.trim()) return
 
-    await updateCard(card, columnId || columns[0].id)
-    setIsAddingCard(false)
-    setColumnTargetId(null)
-    setCardToEdit(null)
+    const targetColumnId = columnId || columns[0].id
+
+    startTransition(async () => {
+      updateOptimisticColumns({ type: 'update', card: { ...card, column_id: targetColumnId } })
+    })
+
+    try {
+      await updateCard(card, targetColumnId)
+    } catch (error) {
+      console.error('Failed to update card:', error)
+    } finally {
+      setIsAddingCard(false)
+      setColumnTargetId(null)
+      setCardToEdit(null)
+    }
   }
 
   return (
@@ -170,7 +225,7 @@ export default function BoardPage() {
             id="board"
             className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 lg:[&::-webkit-scrollbar]:h2 lg:[&::-webkit-scrollbar-track]:bg-gray-300 lg:[&::-webkit-scrollbar-thumb]:rounded-xl lg:[&::-webkit-scrollbar-thumb]:bg-gray-400 space-y-4 lg:space-y-0 h-[calc(100vh-200px)]"
           >
-            {columns?.map((column) => (
+            {optimisticColumns?.map((column) => (
               <Column
                 key={column.id}
                 column={column}
