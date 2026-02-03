@@ -1,10 +1,12 @@
+export type Priority = 'default' | 'low' | 'medium' | 'high'
+
 export interface Filter {
-  priority?: 'default' | 'low' | 'medium' | 'high'
+  priority?: Priority[]
 }
 
 export interface NewCard {
   title: string
   description?: string
-  priority: 'default' | 'low' | 'medium' | 'high'
+  priority: Priority
   column_id: number
 }

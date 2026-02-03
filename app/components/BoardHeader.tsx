@@ -1,0 +1,54 @@
+import { Button, Tag } from 'antd'
+import { PlusOutlined, CloseOutlined } from '@ant-design/icons'
+import { Filter, Priority } from '@/types/types'
+
+export default function BoardHeader({
+  filteredCardsCount,
+  totalCardsCount,
+  filters,
+  filterOptions,
+  onResetFilters,
+  onAddCard
+}: {
+  filteredCardsCount: number
+  totalCardsCount: number
+  filters: Filter
+  filterOptions: { priority: { value: string; label: string; color: string }[] }
+  onResetFilters: () => void
+  onAddCard: () => void
+}) {
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 space-x-4 sm:space-x-0 px-2 sm:px-4 ">
+      <div className="flex flex-wrap items-center gap-4 sm:gap-6 pb-2">
+        <div className="text-sm text-gray-600">
+          <span className="font-medium">Total cards: </span>
+          {filteredCardsCount !== totalCardsCount && <span>{filteredCardsCount}/</span>}
+          <span>{totalCardsCount}</span>
+        </div>
+
+        {filteredCardsCount !== totalCardsCount && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">Filters:</span>
+            {filters.priority?.map((priority) => (
+              <Tag key={priority} color={filterOptions.priority.find((option) => option.value === priority)?.color}>
+                {filterOptions.priority.find((option) => option.value === priority)?.label}
+              </Tag>
+            ))}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Button type="text" size="small" onClick={onResetFilters}>
+                <CloseOutlined />
+                Reset filters
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="pb-2">
+        <Button color="primary" variant="solid" onClick={onAddCard}>
+          <PlusOutlined />
+          Add Card
+        </Button>
+      </div>
+    </div>
+  )
+}

@@ -1,10 +1,8 @@
 'use client'
-import { useState, useOptimistic, startTransition } from 'react'
+import { useState, useOptimistic, startTransition, useMemo } from 'react'
 import { Filter, NewCard } from '@/types/types'
 import { Column as ColumnType, Card as CardType, ColumnWithCards } from '@/lib/supabase/models'
 import { useParams } from 'next/navigation'
-import { Button } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
 import { SortableContext } from '@dnd-kit/sortable'
 import { DndContext, DragOverlay, PointerSensor, rectIntersection, useSensor, useSensors } from '@dnd-kit/core'
 import { verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -15,6 +13,7 @@ import { useNotification } from '@/lib/utils/notifications'
 import NavBar from '@/app/components/NavBar'
 import BoardEditionModal from '@/app/components/BoardEditionModal'
 import BoardFiltersModal from '@/app/components/BoardFiltersModal'
+import BoardHeader from '@/app/components/BoardHeader'
 import Column from '@/app/components/Column'
 import ColumnEditionModal from '@/app/components/ColumnEditionModal'
 import AddColumnButton from '@/app/components/AddColumnButton'
@@ -64,30 +63,52 @@ export default function BoardPage() {
 
   const filterOptions = {
     priority: [
-      { value: 'default', label: 'None' },
-      { value: 'low', label: 'Low' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'high', label: 'High' }
+      { value: 'default', label: 'None', color: '' },
+      { value: 'low', label: 'Low', color: 'green' },
+      { value: 'medium', label: 'Medium', color: 'orange' },
+      { value: 'high', label: 'High', color: 'red' }
     ]
   }
 
+  const filteredColumns = useMemo(() => {
+    if (!filters.priority || filters.priority.length === 0) {
+      return optimisticColumns
+    }
+
+    return optimisticColumns.map((column) => ({
+      ...column,
+      cards: column.cards.filter((card) => filters.priority?.includes(card.priority))
+    }))
+  }, [optimisticColumns, filters.priority])
+
+  const filteredCardsCount = useMemo(
+    () => filteredColumns?.reduce((count, column) => count + column.cards.length, 0) || 0,
+    [filteredColumns]
+  )
+
+  const totalCardsCount = useMemo(
+    () => optimisticColumns?.reduce((count, column) => count + column.cards.length, 0) || 0,
+    [optimisticColumns]
+  )
+
   const handleSubmitFilters = (filters: Filter) => {
     setFilters(filters)
-    // TODO: filter cards
-
     setIsFiltering(false)
   }
 
   const handleResetFilters = () => {
-    setFilters({ ...filters, priority: 'default' })
+    setFilters({ ...filters, priority: [] })
     setIsFiltering(false)
   }
 
   const filterCount = () => {
-    return Object.keys(filters).reduce(
-      (count, filterKey) => (filters[filterKey as keyof Filter] !== 'default' ? count + 1 : count),
-      0
-    )
+    return Object.keys(filters).reduce((count, filterKey) => {
+      const value = filters[filterKey as keyof Filter]
+      if (Array.isArray(value) && value.length > 0) {
+        return count + value.length
+      }
+      return count
+    }, 0)
   }
 
   const handleEditColumnModal = (column: ColumnType | null) => {
@@ -240,20 +261,14 @@ export default function BoardPage() {
       />
 
       <main className="py-4 sm:py-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 space-x-4 sm:space-x-0 px-2 sm:px-4 ">
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 pb-2">
-            <div className="text-sm text-gray-600">
-              <span className="font-medium">Total cards: </span>
-              <span>{columns?.reduce((count, column) => count + column.cards.length, 0)}</span>
-            </div>
-          </div>
-          <div className="pb-2">
-            <Button color="primary" variant="solid" onClick={() => handleEditCardModal(null, null)}>
-              <PlusOutlined />
-              Add Card
-            </Button>
-          </div>
-        </div>
+        <BoardHeader
+          filteredCardsCount={filteredCardsCount}
+          totalCardsCount={totalCardsCount}
+          filters={filters}
+          filterOptions={filterOptions}
+          onResetFilters={handleResetFilters}
+          onAddCard={() => handleEditCardModal(null, null)}
+        />
 
         <DndContext
           sensors={sensors}
@@ -266,7 +281,7 @@ export default function BoardPage() {
             id="board"
             className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 lg:[&::-webkit-scrollbar]:h2 lg:[&::-webkit-scrollbar-track]:bg-gray-300 lg:[&::-webkit-scrollbar-thumb]:rounded-xl lg:[&::-webkit-scrollbar-thumb]:bg-gray-400 space-y-4 lg:space-y-0 h-[calc(100vh-200px)]"
           >
-            {optimisticColumns?.map((column) => (
+            {filteredColumns?.map((column) => (
               <Column
                 key={column.id}
                 column={column}
@@ -278,6 +293,7 @@ export default function BoardPage() {
                     <Card
                       key={card.id}
                       card={card}
+                      priorityOptions={filterOptions.priority}
                       onEditCard={(card: NewCard | CardType) => handleEditCardModal(card, column.id)}
                     />
                   ))}
@@ -288,7 +304,9 @@ export default function BoardPage() {
             <AddColumnButton onAddColumn={() => handleEditColumnModal(null)} />
           </div>
 
-          <DragOverlay>{activeCard && <Card card={activeCard} onEditCard={() => {}} />}</DragOverlay>
+          <DragOverlay>
+            {activeCard && <Card card={activeCard} priorityOptions={filterOptions.priority} onEditCard={() => {}} />}
+          </DragOverlay>
         </DndContext>
       </main>
 

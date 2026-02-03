@@ -1,3 +1,5 @@
+import { Priority } from '@/types/types'
+
 export interface Board {
   id: number
   title: string
@@ -19,7 +21,7 @@ export interface Card {
   title: string
   description?: string
   position: number
-  priority: 'default' | 'low' | 'medium' | 'high'
+  priority: Priority
   column_id: number
   created_at: string
   updated_at: string

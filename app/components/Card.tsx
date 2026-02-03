@@ -5,14 +5,15 @@ import { AlignLeftOutlined } from '@ant-design/icons'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-export default function Card({ card, onEditCard }: { card: CardType; onEditCard: (card: NewCard) => void }) {
-  const priorityColors = {
-    low: 'green',
-    medium: 'orange',
-    high: 'red',
-    default: ''
-  }
-
+export default function Card({
+  card,
+  priorityOptions,
+  onEditCard
+}: {
+  card: CardType
+  priorityOptions: { value: string; label: string; color: string }[]
+  onEditCard: (card: NewCard) => void
+}) {
   const { setNodeRef, listeners, attributes, transform, transition, isDragging } = useSortable({ id: card.id })
   const styles = {
     transform: CSS.Transform.toString(transform),
@@ -32,8 +33,8 @@ export default function Card({ card, onEditCard }: { card: CardType; onEditCard:
       <div className="py-2 px-3">
         <div className="flex items-center justify-between space-x-2 min-w-0">
           <h3 className="font-medium mb-0 truncated">{card.title}</h3>
-          <Tag color={priorityColors[card.priority]}>
-            <span className="capitalize">{card.priority}</span>
+          <Tag color={priorityOptions.find((option) => option.value === card.priority)?.color || ''}>
+            {priorityOptions.find((option) => option.value === card.priority)?.label}
           </Tag>
         </div>
         {card.description && (

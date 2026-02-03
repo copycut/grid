@@ -54,7 +54,7 @@ export default function DashboardGridItem({
         }
         extra={
           <Dropdown menu={{ items: menuItems }} trigger={['click']} placement="bottomRight">
-            <Button type="text" size="small" onClick={(e) => e.preventDefault()}>
+            <Button type="text" shape="circle" onClick={(e) => e.preventDefault()}>
               <EllipsisOutlined />
             </Button>
           </Dropdown>
