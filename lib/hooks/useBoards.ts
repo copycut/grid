@@ -198,17 +198,25 @@ export function useBoard(boardId: number) {
       const updatedCard = await cardService.updateCard(supabase!, cardData.id, cardData)
 
       setColumns((prev) =>
-        prev
-          .map((column) => ({
-            ...column,
-            cards: column.cards.filter((card) => card.id !== updatedCard.id)
-          }))
-          .map((column) => {
+        prev.map((column) => {
+          // If card is in this column
+          if (column.cards.some((card) => card.id === updatedCard.id)) {
             if (column.id === columnId) {
-              return { ...column, cards: [...column.cards, updatedCard] }
+              // Card stays in same column - update in place
+              return {
+                ...column,
+                cards: column.cards.map((card) => (card.id === updatedCard.id ? updatedCard : card))
+              }
+            } else {
+              // Card moved to different column - remove from this column
+              return { ...column, cards: column.cards.filter((card) => card.id !== updatedCard.id) }
             }
-            return column
-          })
+          } else if (column.id === columnId) {
+            // Card moved to this column - append to end
+            return { ...column, cards: [...column.cards, updatedCard] }
+          }
+          return column
+        })
       )
       return updatedCard
     } catch (error) {

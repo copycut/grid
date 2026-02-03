@@ -46,12 +46,23 @@ export function useOptimisticColumns(columns: ColumnWithCards[]) {
 
       if (action.type === 'update' && action.card) {
         return currentColumns.map((column) => {
-          const filteredCards = column.cards.filter((card) => card.id !== action.card!.id)
-
-          if (column.id === action.card!.column_id) {
-            return { ...column, cards: [...filteredCards, action.card!] }
+          // If card is in this column, update it in place
+          if (column.cards.some((card) => card.id === action.card!.id)) {
+            if (column.id === action.card!.column_id) {
+              // Card stays in same column - update in place
+              return {
+                ...column,
+                cards: column.cards.map((card) => (card.id === action.card!.id ? action.card! : card))
+              }
+            } else {
+              // Card moved to different column - remove from this column
+              return { ...column, cards: column.cards.filter((card) => card.id !== action.card!.id) }
+            }
+          } else if (column.id === action.card!.column_id) {
+            // Card moved to this column - append to end
+            return { ...column, cards: [...column.cards, action.card!] }
           }
-          return { ...column, cards: filteredCards }
+          return column
         })
       }
 
