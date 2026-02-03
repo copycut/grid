@@ -3,22 +3,23 @@ import { useState, useOptimistic, startTransition } from 'react'
 import { Filter, NewCard } from '@/types/types'
 import { Column as ColumnType, Card as CardType, ColumnWithCards } from '@/lib/supabase/models'
 import { useParams } from 'next/navigation'
-import { useBoard } from '@/lib/hooks/useBoards'
 import { Button } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
+import { SortableContext } from '@dnd-kit/sortable'
+import { DndContext, DragOverlay, PointerSensor, rectIntersection, useSensor, useSensors } from '@dnd-kit/core'
+import { verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useBoard } from '@/lib/hooks/useBoards'
+import { useDragAndDrop } from '@/lib/hooks/useDragAndDrop'
+import { useOptimisticColumns } from '@/lib/hooks/useOptimisticColumns'
+import { useNotification } from '@/lib/utils/notifications'
 import NavBar from '@/app/components/NavBar'
-import CardEditionModal from '@/app/components/CardEditionModal'
 import BoardEditionModal from '@/app/components/BoardEditionModal'
 import BoardFiltersModal from '@/app/components/BoardFiltersModal'
 import Column from '@/app/components/Column'
-import Card from '@/app/components/Card'
 import ColumnEditionModal from '@/app/components/ColumnEditionModal'
-import { DndContext, DragOverlay, PointerSensor, rectIntersection, useSensor, useSensors } from '@dnd-kit/core'
-import { SortableContext } from '@dnd-kit/sortable'
-import { verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { useDragAndDrop } from '@/lib/hooks/useDragAndDrop'
-import { AddColumnButton } from '@/app/components/AddColumnButton'
-import { useOptimisticColumns } from '@/lib/hooks/useOptimisticColumns'
+import AddColumnButton from '@/app/components/AddColumnButton'
+import Card from '@/app/components/Card'
+import CardEditionModal from '@/app/components/CardEditionModal'
 
 export default function BoardPage() {
   const { id } = useParams<{ id: string }>()
@@ -47,6 +48,7 @@ export default function BoardPage() {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
   const { activeCard, handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop(columns, setColumns, moveCard)
   const { optimisticColumns, updateOptimisticColumns } = useOptimisticColumns(columns)
+  const { notifySuccess, notifyError } = useNotification()
 
   const handleUpdateBoard = async (title: string) => {
     if (!board || !title.trim()) return
@@ -54,7 +56,7 @@ export default function BoardPage() {
     try {
       await updateBoard(board.id, { title: title.trim() })
     } catch (error) {
-      console.error(error)
+      notifyError('Failed to update board', 'Please try again.', error)
     } finally {
       setIsBoardEditing(false)
     }
@@ -112,8 +114,9 @@ export default function BoardPage() {
 
     try {
       await createColumn(title)
+      notifySuccess('Column created')
     } catch (error) {
-      console.error('Failed to create column:', error)
+      notifyError('Failed to create column', 'Please try again.', error)
     } finally {
       setIsEditingColumn(false)
       setColumnToEdit(null)
@@ -127,8 +130,9 @@ export default function BoardPage() {
 
     try {
       await updateColumn(column)
+      notifySuccess('Column updated')
     } catch (error) {
-      console.error('Failed to update column:', error)
+      notifyError('Failed to update column', `Column title: ${column.title}`, error)
     } finally {
       setIsEditingColumn(false)
       setColumnToEdit(null)
@@ -142,8 +146,9 @@ export default function BoardPage() {
 
     try {
       await deleteColumn(columnId)
+      notifySuccess('Column deleted')
     } catch (error) {
-      console.error('Failed to delete column:', error)
+      notifyError('Failed to delete column', `Column title: ${columnToEdit?.title}`, error)
     } finally {
       setIsEditingColumn(false)
       setColumnToEdit(null)
@@ -177,8 +182,9 @@ export default function BoardPage() {
 
     try {
       await createCard(newCard, columnId)
+      notifySuccess('Card created')
     } catch (error) {
-      console.error('Failed to create card:', error)
+      notifyError('Failed to create card', 'Please try again.', error)
     } finally {
       setIsAddingCard(false)
       setColumnTargetId(null)
@@ -197,8 +203,9 @@ export default function BoardPage() {
 
     try {
       await updateCard(card, targetColumnId)
+      notifySuccess('Card updated')
     } catch (error) {
-      console.error('Failed to update card:', error)
+      notifyError('Failed to update card', 'Please try again.', error)
     } finally {
       setIsAddingCard(false)
       setColumnTargetId(null)
@@ -213,8 +220,9 @@ export default function BoardPage() {
 
     try {
       await deleteCard(cardId)
+      notifySuccess('Card deleted')
     } catch (error) {
-      console.error('Failed to delete card:', error)
+      notifyError('Failed to delete card', `Card title: ${cardToEdit?.title}`, error)
     } finally {
       setIsAddingCard(false)
       setColumnTargetId(null)

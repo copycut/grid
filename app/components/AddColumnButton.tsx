@@ -1,6 +1,6 @@
 import { PlusOutlined } from '@ant-design/icons'
 
-export function AddColumnButton({ onAddColumn }: { onAddColumn: () => void }) {
+export default function AddColumnButton({ onAddColumn }: { onAddColumn: () => void }) {
   return (
     <div className="grid grid-cols-1 w-full lg:shrink-0 lg:w-80 pt-1">
       <button

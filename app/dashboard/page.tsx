@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { useBoards } from '@/lib/hooks/useBoards'
+import { useNotification } from '@/lib/utils/notifications'
 import NavBar from '@/app/components/NavBar'
 import DashboardTopCards from '@/app/components/DashboardTopCards'
 import DashboardFilters from '@/app/components/DashboardFilters'
@@ -16,6 +17,7 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isBoardDeletion, setIsBoardDeletion] = useState(false)
   const [boardIdToDelete, setBoardIdToDelete] = useState<number | null>(null)
+  const { notifySuccess, notifyError } = useNotification()
 
   useEffect(() => {
     loadBoards()
@@ -27,9 +29,15 @@ export default function DashboardPage() {
   }
 
   const handleDeleteBoard = async (boardId: number) => {
-    await deleteBoard(boardId)
-    setIsBoardDeletion(false)
-    setBoardIdToDelete(null)
+    try {
+      await deleteBoard(boardId)
+      notifySuccess('Board deleted successfully')
+    } catch (error) {
+      notifyError('Failed to delete board', 'Please try again')
+    } finally {
+      setIsBoardDeletion(false)
+      setBoardIdToDelete(null)
+    }
   }
 
   const handleCreateBoard = async () => {
