@@ -1,11 +1,11 @@
 'use client'
-import { useState, useOptimistic, startTransition, useMemo } from 'react'
+import { useState, startTransition, useMemo } from 'react'
 import { Filter, NewCard } from '@/types/types'
 import { Column as ColumnType, Card as CardType, ColumnWithCards } from '@/lib/supabase/models'
 import { useParams } from 'next/navigation'
 import { SortableContext } from '@dnd-kit/sortable'
 import { DndContext, DragOverlay, PointerSensor, rectIntersection, useSensor, useSensors } from '@dnd-kit/core'
-import { verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { horizontalListSortingStrategy, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoard } from '@/lib/hooks/useBoards'
 import { useDragAndDrop } from '@/lib/hooks/useDragAndDrop'
 import { useOptimisticColumns } from '@/lib/hooks/useOptimisticColumns'
@@ -31,6 +31,7 @@ export default function BoardPage() {
     createColumn,
     deleteColumn,
     updateColumn,
+    moveColumn,
     createCard,
     updateCard,
     moveCard,
@@ -45,7 +46,12 @@ export default function BoardPage() {
   const [isEditingColumn, setIsEditingColumn] = useState(false)
   const [columnToEdit, setColumnToEdit] = useState<ColumnType | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
-  const { activeCard, handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop(columns, setColumns, moveCard)
+  const { activeCard, activeColumn, handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop(
+    columns,
+    setColumns,
+    moveCard,
+    moveColumn
+  )
   const { optimisticColumns, updateOptimisticColumns } = useOptimisticColumns(columns)
   const { notifySuccess, notifyError } = useNotification()
 
@@ -276,33 +282,44 @@ export default function BoardPage() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <div
-              id="board"
-              className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 space-y-4 lg:space-y-0"
-            >
-              {filteredColumns?.map((column) => (
-                <Column
-                  key={column.id}
-                  column={column}
-                  onCreateCard={() => handleEditCardModal(null, column.id)}
-                  onEditColumn={() => handleEditColumnModal(column)}
-                >
-                  <SortableContext items={column.cards.map((card) => card.id)} strategy={verticalListSortingStrategy}>
-                    {column.cards.map((card) => (
-                      <Card
-                        key={card.id}
-                        card={card}
-                        priorityOptions={filterOptions.priority}
-                        onEditCard={(card: NewCard | CardType) => handleEditCardModal(card, column.id)}
-                      />
-                    ))}
-                  </SortableContext>
-                </Column>
-              ))}
-              <AddColumnButton onAddColumn={() => handleEditColumnModal(null)} />
-            </div>
+            <SortableContext items={filteredColumns.map((col) => col.id)} strategy={horizontalListSortingStrategy}>
+              <div
+                id="board"
+                className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 space-y-4 lg:space-y-0"
+              >
+                {filteredColumns?.map((column) => (
+                  <Column
+                    key={column.id}
+                    column={column}
+                    onCreateCard={() => handleEditCardModal(null, column.id)}
+                    onEditColumn={() => handleEditColumnModal(column)}
+                  >
+                    <SortableContext items={column.cards.map((card) => card.id)} strategy={verticalListSortingStrategy}>
+                      {column.cards.map((card) => (
+                        <Card
+                          key={card.id}
+                          card={card}
+                          priorityOptions={filterOptions.priority}
+                          onEditCard={(card: NewCard | CardType) => handleEditCardModal(card, column.id)}
+                        />
+                      ))}
+                    </SortableContext>
+                  </Column>
+                ))}
+                <AddColumnButton onAddColumn={() => handleEditColumnModal(null)} />
+              </div>
+            </SortableContext>
             <DragOverlay>
               {activeCard && <Card card={activeCard} priorityOptions={filterOptions.priority} onEditCard={() => {}} />}
+              {activeColumn && (
+                <Column column={activeColumn} onCreateCard={() => {}} onEditColumn={() => {}}>
+                  <div className="p-4 space-y-2">
+                    {activeColumn.cards.map((card) => (
+                      <Card key={card.id} card={card} priorityOptions={filterOptions.priority} onEditCard={() => {}} />
+                    ))}
+                  </div>
+                </Column>
+              )}
             </DragOverlay>
           </DndContext>
         </main>

@@ -70,6 +70,27 @@ export const columnService = {
   async deleteColumn(supabase: SupabaseClient, columnId: number) {
     const { error } = await supabase.from('columns').delete().eq('id', columnId)
     if (error) throw error
+  },
+
+  async moveColumn(supabase: SupabaseClient, columnId: number, newPosition: number) {
+    await supabase.from('columns').update({ position: newPosition }).eq('id', columnId)
+
+    // Reorder all columns in the board
+    const { data: column } = await supabase.from('columns').select('board_id').eq('id', columnId).single()
+
+    if (column) {
+      const { data: allColumns } = await supabase
+        .from('columns')
+        .select('id')
+        .eq('board_id', column.board_id)
+        .order('position')
+
+      if (allColumns) {
+        await Promise.all(
+          allColumns.map((col, index) => supabase.from('columns').update({ position: index }).eq('id', col.id))
+        )
+      }
+    }
   }
 }
 

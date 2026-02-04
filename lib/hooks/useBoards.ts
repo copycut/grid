@@ -296,6 +296,15 @@ export function useBoard(boardId: number) {
     }
   }
 
+  async function moveColumn(columnId: number, newPosition: number) {
+    try {
+      await columnService.moveColumn(supabase!, columnId, newPosition)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to move column')
+      throw error
+    }
+  }
+
   return {
     loading,
     error,
@@ -310,6 +319,7 @@ export function useBoard(boardId: number) {
     createCard,
     updateCard,
     moveCard,
-    deleteCard
+    deleteCard,
+    moveColumn
   }
 }
