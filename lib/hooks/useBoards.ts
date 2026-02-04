@@ -227,53 +227,15 @@ export function useBoard(boardId: number) {
 
   async function moveCard(cardId: number, newColumnId: number, newPosition: number) {
     try {
+      // The optimistic update is already done by handleDragOver in useDragAndDrop
+      // We just need to persist to the database
       await cardService.moveCard(supabase!, cardId, newColumnId, newPosition)
 
-      setColumns((prev) => {
-        const newColumns = [...prev]
-        let cardToMove: Card | null = null
-        let oldColumnId: number | null = null
-
-        // Find and remove the card from its current column
-        for (const column of newColumns) {
-          const cardIndex = column.cards.findIndex((card) => card.id === cardId)
-          if (cardIndex !== -1) {
-            cardToMove = column.cards[cardIndex]
-            oldColumnId = column.id
-            column.cards.splice(cardIndex, 1)
-            break
-          }
-        }
-
-        // Add card to new column and update positions
-        if (cardToMove) {
-          const targetColumn = newColumns.find((column) => column.id === newColumnId)
-          if (targetColumn) {
-            cardToMove.column_id = newColumnId
-            cardToMove.position = newPosition
-            targetColumn.cards.splice(newPosition, 0, cardToMove)
-
-            // Renumber all cards in target column
-            targetColumn.cards.forEach((card, index) => {
-              card.position = index
-            })
-          }
-
-          // Renumber cards in old column if different
-          if (oldColumnId !== newColumnId) {
-            const oldColumn = newColumns.find((column) => column.id === oldColumnId)
-            if (oldColumn) {
-              oldColumn.cards.forEach((card, index) => {
-                card.position = index
-              })
-            }
-          }
-        }
-
-        return newColumns
-      })
+      // Note: We don't update state here because handleDragOver already did the optimistic update
+      // If we update here, it causes a visual jump: optimistic update → revert → API update
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to move card')
+      // TODO: Revert the optimistic update on error
       throw error
     }
   }

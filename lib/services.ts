@@ -131,44 +131,98 @@ export const cardService = {
 
   async moveCard(supabase: SupabaseClient, cardId: number, newColumnId: number, newPosition: number) {
     // Get the card being moved
-    const { data: movingCard } = await supabase.from('cards').select('column_id').eq('id', cardId).single()
+    const { data: movingCard } = await supabase.from('cards').select('column_id, position').eq('id', cardId).single()
 
     if (!movingCard) throw new Error('Card not found')
 
     const oldColumnId = movingCard.column_id
+    const oldPosition = movingCard.position
 
-    // Move the card
-    await supabase
+    // Get all cards in the target column (before moving)
+    const { data: targetColumnCards } = await supabase
       .from('cards')
-      .update({ column_id: newColumnId, position: newPosition, updated_at: new Date().toISOString() })
-      .eq('id', cardId)
-
-    // Reorder cards in the new column
-    const { data: newColumnCards } = await supabase
-      .from('cards')
-      .select('id')
+      .select('id, position')
       .eq('column_id', newColumnId)
       .order('position')
 
-    if (newColumnCards) {
-      await Promise.all(
-        newColumnCards.map((card, index) => supabase.from('cards').update({ position: index }).eq('id', card.id))
-      )
-    }
+    if (!targetColumnCards) return
 
-    // If moved to different column, reorder old column too
-    if (oldColumnId !== newColumnId) {
+    // If moving within the same column
+    if (oldColumnId === newColumnId) {
+      // Adjust positions for cards between old and new position
+      if (oldPosition < newPosition) {
+        // Moving down: shift cards between old and new position up
+        const cardsToUpdate = targetColumnCards.filter(
+          (card) => card.position > oldPosition && card.position <= newPosition
+        )
+
+        const updates = cardsToUpdate.map((card) =>
+          supabase
+            .from('cards')
+            .update({ position: card.position - 1 })
+            .eq('id', card.id)
+        )
+
+        await Promise.all(updates)
+      } else if (oldPosition > newPosition) {
+        // Moving up: shift cards between new and old position down
+        const cardsToUpdate = targetColumnCards.filter(
+          (card) => card.position >= newPosition && card.position < oldPosition
+        )
+
+        const updates = cardsToUpdate.map((card) =>
+          supabase
+            .from('cards')
+            .update({ position: card.position + 1 })
+            .eq('id', card.id)
+        )
+
+        await Promise.all(updates)
+      }
+    } else {
+      // Moving to a different column
+      // Shift cards in the new column at or after the new position down
+      const updates = targetColumnCards
+        .filter((card) => card.position >= newPosition)
+        .map((card) =>
+          supabase
+            .from('cards')
+            .update({ position: card.position + 1 })
+            .eq('id', card.id)
+        )
+
+      await Promise.all(updates)
+
+      // Shift cards in the old column after the old position up
       const { data: oldColumnCards } = await supabase
         .from('cards')
-        .select('id')
+        .select('id, position')
         .eq('column_id', oldColumnId)
         .order('position')
 
       if (oldColumnCards) {
-        await Promise.all(
-          oldColumnCards.map((card, index) => supabase.from('cards').update({ position: index }).eq('id', card.id))
-        )
+        const oldUpdates = oldColumnCards
+          .filter((card) => card.position > oldPosition)
+          .map((card) =>
+            supabase
+              .from('cards')
+              .update({ position: card.position - 1 })
+              .eq('id', card.id)
+          )
+
+        await Promise.all(oldUpdates)
       }
+    }
+
+    // Finally, move the card to its new position
+    const { error } = await supabase
+      .from('cards')
+      .update({ column_id: newColumnId, position: newPosition, updated_at: new Date().toISOString() })
+      .eq('id', cardId)
+
+    if (error) {
+      console.error('Error updating card position:', error)
+      throw error
     }
   },
 
