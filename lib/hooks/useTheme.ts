@@ -3,6 +3,7 @@ import { theme } from 'antd'
 
 export function useTheme() {
   const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === 'undefined') return false
     return window.matchMedia('(prefers-color-scheme:dark)').matches
   })
 
@@ -11,6 +12,7 @@ export function useTheme() {
   }, [])
 
   useEffect(() => {
+    if (!window) return
     const windowQuery = window.matchMedia('(prefers-color-scheme:dark)')
     windowQuery.addEventListener('change', darkModeChange)
     return () => {

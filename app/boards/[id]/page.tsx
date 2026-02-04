@@ -252,100 +252,94 @@ export default function BoardPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <NavBar
-        boardTitle={board?.title}
-        onEditBoard={() => setIsBoardEditing(true)}
-        onFilter={() => setIsFiltering(true)}
-        filterCount={filterCount()}
-      />
-
-      <main className="py-4 sm:py-6">
-        <BoardHeader
-          filteredCardsCount={filteredCardsCount}
-          totalCardsCount={totalCardsCount}
-          filters={filters}
-          filterOptions={filterOptions}
-          onResetFilters={handleResetFilters}
-          onAddCard={() => handleEditCardModal(null, null)}
+    <div className="bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-gray-950 dark:to-purple-950">
+      <div className="min-h-screen dark:bg-gray-900/70">
+        <NavBar
+          boardTitle={board?.title}
+          onEditBoard={() => setIsBoardEditing(true)}
+          onFilter={() => setIsFiltering(true)}
+          filterCount={filterCount()}
         />
-
-        <DndContext
-          sensors={sensors}
-          collisionDetection={rectIntersection}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <div
-            id="board"
-            className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 lg:[&::-webkit-scrollbar]:h2 lg:[&::-webkit-scrollbar-track]:bg-gray-300 lg:[&::-webkit-scrollbar-thumb]:rounded-xl lg:[&::-webkit-scrollbar-thumb]:bg-gray-400 space-y-4 lg:space-y-0 h-[calc(100vh-200px)]"
+        <main className="py-4 sm:py-6">
+          <BoardHeader
+            filteredCardsCount={filteredCardsCount}
+            totalCardsCount={totalCardsCount}
+            filters={filters}
+            filterOptions={filterOptions}
+            onResetFilters={handleResetFilters}
+            onAddCard={() => handleEditCardModal(null, null)}
+          />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={rectIntersection}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
           >
-            {filteredColumns?.map((column) => (
-              <Column
-                key={column.id}
-                column={column}
-                onCreateCard={() => handleEditCardModal(null, column.id)}
-                onEditColumn={() => handleEditColumnModal(column)}
-              >
-                <SortableContext items={column.cards.map((card) => card.id)} strategy={verticalListSortingStrategy}>
-                  {column.cards.map((card) => (
-                    <Card
-                      key={card.id}
-                      card={card}
-                      priorityOptions={filterOptions.priority}
-                      onEditCard={(card: NewCard | CardType) => handleEditCardModal(card, column.id)}
-                    />
-                  ))}
-                </SortableContext>
-              </Column>
-            ))}
-
-            <AddColumnButton onAddColumn={() => handleEditColumnModal(null)} />
-          </div>
-
-          <DragOverlay>
-            {activeCard && <Card card={activeCard} priorityOptions={filterOptions.priority} onEditCard={() => {}} />}
-          </DragOverlay>
-        </DndContext>
-      </main>
-
-      <ColumnEditionModal
-        isOpen={isEditingColumn}
-        column={columnToEdit}
-        onClose={() => setIsEditingColumn(false)}
-        onSave={(title) => handleCreateColumn(title)}
-        onEdit={(column) => handleUpdateColumn(column)}
-        onDeleteColumn={(columnId) => handleDeleteColumn(columnId)}
-      />
-
-      <CardEditionModal
-        isOpen={isAddingCard}
-        columnTargetId={columnTargetId}
-        columns={columns}
-        card={cardToEdit}
-        filterOptions={filterOptions}
-        onClose={() => setIsAddingCard(false)}
-        onEdit={(newCard: CardType, columnId: number) => handleUpdateCard(newCard, columnId)}
-        onSave={(newCard: NewCard, columnId: number) => handleCreateCard(newCard, columnId)}
-        onDelete={(cardId: number) => handleDeleteCard(cardId)}
-      />
-
-      <BoardEditionModal
-        isOpen={isBoardEditing}
-        board={board}
-        onClose={() => setIsBoardEditing(false)}
-        onSubmit={(title: string) => handleUpdateBoard(title)}
-      />
-
-      <BoardFiltersModal
-        isOpen={isFiltering}
-        filters={filters}
-        priorities={filterOptions}
-        onReset={handleResetFilters}
-        onClose={() => setIsFiltering(false)}
-        onSubmit={(filters: Filter) => handleSubmitFilters(filters)}
-      />
+            <div
+              id="board"
+              className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 space-y-4 lg:space-y-0"
+            >
+              {filteredColumns?.map((column) => (
+                <Column
+                  key={column.id}
+                  column={column}
+                  onCreateCard={() => handleEditCardModal(null, column.id)}
+                  onEditColumn={() => handleEditColumnModal(column)}
+                >
+                  <SortableContext items={column.cards.map((card) => card.id)} strategy={verticalListSortingStrategy}>
+                    {column.cards.map((card) => (
+                      <Card
+                        key={card.id}
+                        card={card}
+                        priorityOptions={filterOptions.priority}
+                        onEditCard={(card: NewCard | CardType) => handleEditCardModal(card, column.id)}
+                      />
+                    ))}
+                  </SortableContext>
+                </Column>
+              ))}
+              <AddColumnButton onAddColumn={() => handleEditColumnModal(null)} />
+            </div>
+            <DragOverlay>
+              {activeCard && <Card card={activeCard} priorityOptions={filterOptions.priority} onEditCard={() => {}} />}
+            </DragOverlay>
+          </DndContext>
+        </main>
+        <ColumnEditionModal
+          isOpen={isEditingColumn}
+          column={columnToEdit}
+          onClose={() => setIsEditingColumn(false)}
+          onSave={(title) => handleCreateColumn(title)}
+          onEdit={(column) => handleUpdateColumn(column)}
+          onDeleteColumn={(columnId) => handleDeleteColumn(columnId)}
+        />
+        <CardEditionModal
+          isOpen={isAddingCard}
+          columnTargetId={columnTargetId}
+          columns={columns}
+          card={cardToEdit}
+          filterOptions={filterOptions}
+          onClose={() => setIsAddingCard(false)}
+          onEdit={(newCard: CardType, columnId: number) => handleUpdateCard(newCard, columnId)}
+          onSave={(newCard: NewCard, columnId: number) => handleCreateCard(newCard, columnId)}
+          onDelete={(cardId: number) => handleDeleteCard(cardId)}
+        />
+        <BoardEditionModal
+          isOpen={isBoardEditing}
+          board={board}
+          onClose={() => setIsBoardEditing(false)}
+          onSubmit={(title: string) => handleUpdateBoard(title)}
+        />
+        <BoardFiltersModal
+          isOpen={isFiltering}
+          filters={filters}
+          priorities={filterOptions}
+          onReset={handleResetFilters}
+          onClose={() => setIsFiltering(false)}
+          onSubmit={(filters: Filter) => handleSubmitFilters(filters)}
+        />
+      </div>
     </div>
   )
 }

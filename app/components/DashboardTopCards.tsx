@@ -4,7 +4,7 @@ import { Board } from '@/lib/supabase/models'
 
 export default function DashboardTopCards({ boards }: { boards: Board[] }) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pb-6 sm:pb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 sm:gap-6 pb-6 sm:pb-8">
       <Card title="Total Boards">
         <div className="flex items-center justify-between">
           <p className="text-xl sm:text-2xl font-bold">{boards.length}</p>

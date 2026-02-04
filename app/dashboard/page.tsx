@@ -102,10 +102,7 @@ export default function DashboardPage() {
 
       <main className="px-4 py-6 sm:py-8">
         <div className="pb-6 sm:pb-8">
-          <h1
-            className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-300 pb-2 m-0"
-            data-heading-tag="H1"
-          >
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-300 pb-2 m-0">
             Welcome back, {user?.firstName ?? user?.emailAddresses[0]?.emailAddress}! 👋
           </h1>
           <p className="text-gray-600 dark:text-gray-500">Here what's happening in your Grid today</p>
@@ -130,7 +127,7 @@ export default function DashboardPage() {
           )}
 
           {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
               {filteredBoards.map((board) => (
                 <DashboardGridItem
                   key={board.id}
