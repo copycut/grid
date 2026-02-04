@@ -49,7 +49,7 @@ export default function Column({
         </div>
 
         {/* Column content - droppable for cards */}
-        <div ref={setDroppableRef} className="p-2 space-y-3 min-h-25">
+        <div ref={setDroppableRef} className="p-2 space-y-3 min-h-10">
           {children}
         </div>
 

@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Filter, Priority } from '@/types/types'
 import { Button, Form, Modal } from 'antd'
+import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
+import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
+import { twMerge } from 'tailwind-merge'
 
 export default function BoardFiltersModal({
   isOpen,
@@ -12,7 +15,7 @@ export default function BoardFiltersModal({
 }: {
   isOpen: boolean
   filters: Filter
-  priorities: { priority: { value: string; label: string }[] }
+  priorities: { priority: { value: string; label: string; color: string }[] }
   onReset: () => void
   onClose: () => void
   onSubmit: (filters: Filter) => void
@@ -61,6 +64,22 @@ export default function BoardFiltersModal({
     onSubmit(updatedFilters)
   }
 
+  useKeyboardShortcut(handleSubmit, {
+    key: 'Enter',
+    modifiers: { cmdOrCtrl: true },
+    enabled: isOpen,
+    preventDefault: true
+  })
+
+  useKeyboardShortcut(handleResetForm, {
+    key: 'Backspace',
+    modifiers: { cmdOrCtrl: true },
+    enabled: isOpen,
+    preventDefault: true
+  })
+
+  const possiblesColors = ['bg-gray-500', 'bg-green-500', 'bg-orange-500', 'bg-red-500']
+
   return (
     <Modal
       title="Filter Board"
@@ -68,15 +87,19 @@ export default function BoardFiltersModal({
       okText="Apply"
       onOk={handleSubmit}
       onCancel={onClose}
-      footer={(_, { OkBtn, CancelBtn }) => (
-        <>
-          <CancelBtn />
-          <Button htmlType="reset" onClick={handleResetForm}>
-            Reset filters
-          </Button>
-          <OkBtn />
-        </>
-      )}
+      footer={[
+        <Button key="cancel" onClick={onClose}>
+          Cancel
+        </Button>,
+        <Button htmlType="reset" onClick={handleResetForm}>
+          <ShortcutIndicator>⌫</ShortcutIndicator>
+          Reset filters
+        </Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit}>
+          <ShortcutIndicator>⏎</ShortcutIndicator>
+          <span>Apply</span>
+        </Button>
+      ]}
     >
       <Form form={filterForm} initialValues={{ priority: [] }}>
         <Form.Item label="Priority" name="priority">
@@ -87,6 +110,7 @@ export default function BoardFiltersModal({
                 type={isPrioritySelected(priorityItem.value) ? 'primary' : 'default'}
                 onClick={() => togglePriority(priorityItem.value as Priority)}
               >
+                <span className={twMerge(`h-3 w-3 rounded-full bg-${priorityItem.color || 'gray'}-500`)} />
                 {priorityItem.label}
               </Button>
             ))}

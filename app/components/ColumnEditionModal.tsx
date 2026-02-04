@@ -3,6 +3,8 @@ import { Column, ColumnWithCards } from '@/lib/supabase/models'
 import { Button, Form, Input, Modal, Popconfirm } from 'antd'
 import type { InputRef } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
+import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
+import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function ColumnEditionModal({
   isOpen,
@@ -47,6 +49,13 @@ export default function ColumnEditionModal({
     })
   }
 
+  useKeyboardShortcut(handleSubmit, {
+    key: 'Enter',
+    modifiers: { cmdOrCtrl: true },
+    enabled: isOpen,
+    preventDefault: true
+  })
+
   return (
     <Modal
       title={column ? 'Edit Column' : 'New Column'}
@@ -55,6 +64,15 @@ export default function ColumnEditionModal({
       okText={column ? 'Save' : 'Add'}
       onCancel={onClose}
       forceRender
+      footer={[
+        <Button key="cancel" onClick={onClose}>
+          Cancel
+        </Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit}>
+          <ShortcutIndicator>⏎</ShortcutIndicator>
+          <span>{column ? 'Save' : 'Add'}</span>
+        </Button>
+      ]}
     >
       <Form form={columnForm} onFinish={handleSubmit}>
         <Form.Item label="Column title" name="title" rules={[{ required: true, message: 'Please enter a title' }]}>

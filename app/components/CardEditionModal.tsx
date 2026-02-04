@@ -3,6 +3,8 @@ import { DeleteOutlined } from '@ant-design/icons'
 import { useEffect, useRef, useState } from 'react'
 import { NewCard } from '@/types/types'
 import { Card as CardType, Column as ColumnType } from '@/lib/supabase/models'
+import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
+import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function CardEditionModal({
   isOpen,
@@ -34,6 +36,8 @@ export default function CardEditionModal({
     column_id: 0
   })
   const titleInputRef = useRef<InputRef>(null)
+  // Antd Select captures the Escape keydown event and doesn't trigger the onClose function
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -60,18 +64,54 @@ export default function CardEditionModal({
     }
   }, [isOpen, card, columnTargetId, columns, createCardForm])
 
+  const handleSave = () => {
+    createCardForm.validateFields().then(() => {
+      if (editedCard.title.trim()) {
+        card
+          ? onEdit(editedCard as CardType, editedCard.column_id!)
+          : onSave(editedCard as NewCard, editedCard.column_id!)
+      }
+    })
+  }
+
+  // Close the modal when pressing Escape and no dropdown is open
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isDropdownOpen) {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [isOpen, isDropdownOpen, onClose])
+
+  useKeyboardShortcut(handleSave, {
+    key: 'Enter',
+    modifiers: { cmdOrCtrl: true },
+    enabled: isOpen,
+    preventDefault: true
+  })
+
   return (
     <Modal
       title={card ? 'Edit Card' : 'New Card'}
       open={isOpen}
       forceRender
-      onOk={() =>
-        card
-          ? onEdit(editedCard as CardType, editedCard.column_id!)
-          : onSave(editedCard as NewCard, editedCard.column_id!)
-      }
       okText={card ? 'Save' : 'Add'}
+      onOk={handleSave}
       onCancel={onClose}
+      footer={[
+        <Button key="cancel" onClick={onClose}>
+          Cancel
+        </Button>,
+        <Button key="submit" type="primary" onClick={handleSave}>
+          <ShortcutIndicator>⏎</ShortcutIndicator>
+          <span>{card ? 'Save' : 'Add'}</span>
+        </Button>
+      ]}
     >
       <Form form={createCardForm} layout="vertical">
         <div className="grid grid-cols-2 gap-4">
@@ -80,6 +120,7 @@ export default function CardEditionModal({
               options={columns.map((column) => ({ value: column.id, label: column.title }))}
               value={editedCard.column_id}
               onChange={(value) => setNewCard({ ...editedCard, column_id: value })}
+              onOpenChange={(open) => setIsDropdownOpen(open)}
             />
           </Form.Item>
           <Form.Item label="Priority" name="priority">
@@ -87,6 +128,7 @@ export default function CardEditionModal({
               options={filterOptions.priority}
               value={editedCard.priority}
               onChange={(value) => setNewCard({ ...editedCard, priority: value })}
+              onOpenChange={(open) => setIsDropdownOpen(open)}
             />
           </Form.Item>
         </div>

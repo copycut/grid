@@ -1,6 +1,8 @@
 import { Board } from '@/lib/supabase/models'
-import { Form, Input, InputRef, Modal } from 'antd'
+import { Button, Form, Input, InputRef, Modal } from 'antd'
 import { useEffect, useRef, useState } from 'react'
+import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
+import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function BoardEditionModal({
   isOpen,
@@ -41,8 +43,31 @@ export default function BoardEditionModal({
     })
   }
 
+  useKeyboardShortcut(handleSubmit, {
+    key: 'Enter',
+    modifiers: { cmdOrCtrl: true },
+    enabled: isOpen,
+    preventDefault: true
+  })
+
   return (
-    <Modal title="Edit Board Title" open={isOpen} onOk={handleSubmit} okText="Save" onCancel={onClose} forceRender>
+    <Modal
+      title="Edit Board Title"
+      open={isOpen}
+      onOk={handleSubmit}
+      okText="Save"
+      onCancel={onClose}
+      forceRender
+      footer={[
+        <Button key="cancel" onClick={onClose}>
+          Cancel
+        </Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit}>
+          <ShortcutIndicator>⏎</ShortcutIndicator>
+          <span>Save</span>
+        </Button>
+      ]}
+    >
       <Form form={form} onFinish={handleSubmit}>
         <Form.Item
           hasFeedback

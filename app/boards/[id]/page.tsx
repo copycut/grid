@@ -285,7 +285,7 @@ export default function BoardPage() {
             <SortableContext items={filteredColumns.map((col) => col.id)} strategy={horizontalListSortingStrategy}>
               <div
                 id="board"
-                className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 space-y-4 lg:space-y-0"
+                className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 space-y-4 lg:space-y-0 min-h-dvh"
               >
                 {filteredColumns?.map((column) => (
                   <Column
