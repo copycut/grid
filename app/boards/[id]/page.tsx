@@ -11,19 +11,21 @@ import { useDragAndDrop } from '@/lib/hooks/useDragAndDrop'
 import { useOptimisticColumns } from '@/lib/hooks/useOptimisticColumns'
 import { useNotification } from '@/lib/utils/notifications'
 import NavBar from '@/app/components/NavBar'
-import BoardEditionModal from '@/app/components/BoardEditionModal'
-import BoardFiltersModal from '@/app/components/BoardFiltersModal'
-import BoardHeader from '@/app/components/BoardHeader'
+import BoardEditionModal from '@/app/components/Board/BoardEditionModal'
+import BoardFiltersModal from '@/app/components/Board/BoardFiltersModal'
+import BoardHeader from '@/app/components/Board/BoardHeader'
 import Column from '@/app/components/Column'
-import ColumnEditionModal from '@/app/components/ColumnEditionModal'
-import AddColumnButton from '@/app/components/AddColumnButton'
+import ColumnEditionModal from '@/app/components/Column/ColumnEditionModal'
+import AddColumnButton from '@/app/components/Board/AddColumnButton'
 import Card from '@/app/components/Card'
-import CardEditionModal from '@/app/components/CardEditionModal'
+import CardEditionModal from '@/app/components/Card/CardEditionModal'
+import LoaderPlaceHolder from '@/app/components/ui/LoaderPlaceHolder'
 
 export default function BoardPage() {
   const { id } = useParams<{ id: string }>()
   const boardId = Number(id)
   const {
+    loading,
     board,
     columns,
     updateBoard,
@@ -293,6 +295,7 @@ export default function BoardPage() {
             onResetFilters={handleResetFilters}
             onAddCard={() => handleEditCardModal(null, null)}
           />
+
           <DndContext
             sensors={sensors}
             collisionDetection={rectIntersection}
@@ -305,6 +308,8 @@ export default function BoardPage() {
                 id="board"
                 className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 space-y-4 lg:space-y-0 min-h-dvh"
               >
+                {loading && <LoaderPlaceHolder />}
+
                 {filteredColumns?.map((column) => (
                   <Column
                     key={column.id}

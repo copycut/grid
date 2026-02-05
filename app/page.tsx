@@ -1,6 +1,6 @@
 import { Card } from 'antd'
 import NavBar from '@/app/components/NavBar'
-import HomePageSignInButton from '@/app/components/HomePageSignInButton'
+import HomePageSignInButton from '@/app/components/auth/HomePageSignInButton'
 import { ProjectFilled, TeamOutlined, RocketOutlined, LockOutlined } from '@ant-design/icons'
 
 export default function Home() {

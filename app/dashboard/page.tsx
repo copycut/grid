@@ -6,13 +6,14 @@ import { useOptimisticBoards } from '@/lib/hooks/useOptimisticBoards'
 import { useNotification } from '@/lib/utils/notifications'
 import { Board } from '@/lib/supabase/models'
 import NavBar from '@/app/components/NavBar'
-import DashboardTopCards from '@/app/components/DashboardTopCards'
-import DashboardFilters from '@/app/components/DashboardFilters'
-import DashboardCreateBoard from '@/app/components/DashboardCreateBoard'
-import DashboardGridItem from '@/app/components/DashboardGridItem'
-import DashboardListItem from '@/app/components/DashboardListItem'
-import BoardDeleteModal from '@/app/components/BoardDeleteModal'
-import BoardEditionModal from '@/app/components/BoardEditionModal'
+import DashboardTopCards from '@/app/components/Dashboard/DashboardTopCards'
+import DashboardFilters from '@/app/components/Dashboard/DashboardFilters'
+import DashboardCreateBoard from '@/app/components/Dashboard/DashboardCreateBoard'
+import DashboardGridItem from '@/app/components/Dashboard/DashboardGridItem'
+import DashboardListItem from '@/app/components/Dashboard/DashboardListItem'
+import BoardDeleteModal from '@/app/components/Board/BoardDeleteModal'
+import BoardEditionModal from '@/app/components/Board/BoardEditionModal'
+import LoaderPlaceHolder from '@/app/components/ui/LoaderPlaceHolder'
 
 export default function DashboardPage() {
   const { user } = useUser()
@@ -162,6 +163,8 @@ export default function DashboardPage() {
 
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
+              {loading && <LoaderPlaceHolder height={150} />}
+
               {filteredBoards.map((board) => (
                 <DashboardGridItem
                   key={board.id}
@@ -175,6 +178,8 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="flex flex-col space-y-2 w-full">
+              {loading && <LoaderPlaceHolder height={70} />}
+
               {filteredBoards.map((board) => (
                 <DashboardListItem key={board.id} board={board} onToggleFavorite={handleToggleFavorite} />
               ))}
