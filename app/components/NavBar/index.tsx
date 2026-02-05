@@ -6,12 +6,18 @@ import NavBarOptions from './NavBarOptions'
 
 export default function NavBar({
   boardTitle,
+  isFavorite,
+  boardId,
+  onToggleFavorite,
   onEditBoard,
   onFilter,
   filterCount = 0
 }: {
   boardTitle?: string
+  isFavorite?: boolean
+  boardId?: number
   onEditBoard?: () => void
+  onToggleFavorite?: (boardId: number) => void
   onFilter?: () => void
   filterCount?: number
 }) {
@@ -27,6 +33,9 @@ export default function NavBar({
           isHomePage={isHomePage}
           isDashboard={isDashboard}
           boardTitle={boardTitle}
+          isFavorite={isFavorite}
+          boardId={boardId}
+          onToggleFavorite={onToggleFavorite}
           onEditBoard={onEditBoard}
         />
         <div className="flex items-center space-x-2">

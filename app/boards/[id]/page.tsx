@@ -263,11 +263,23 @@ export default function BoardPage() {
     }
   }
 
+  const handleToggleFavorite = async () => {
+    if (!board) return
+    try {
+      await updateBoard(board.id, { is_favorite: !board.is_favorite })
+    } catch (error) {
+      notifyError('Failed to toggle favorite', 'Please try again', error)
+    }
+  }
+
   return (
     <div className="bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-gray-950 dark:to-purple-950">
       <div className="min-h-screen dark:bg-gray-900/70">
         <NavBar
           boardTitle={board?.title}
+          isFavorite={board?.is_favorite}
+          boardId={board?.id}
+          onToggleFavorite={handleToggleFavorite}
           onEditBoard={() => setIsBoardEditing(true)}
           onFilter={() => setIsFiltering(true)}
           filterCount={filterCount()}

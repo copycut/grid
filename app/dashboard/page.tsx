@@ -26,9 +26,15 @@ export default function DashboardPage() {
   const [boardToEdit, setBoardToEdit] = useState<Board | null>(null)
   const { notifySuccess, notifyError } = useNotification()
 
-  const filteredBoards = optimisticBoards.filter((board) =>
-    board.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredBoards = optimisticBoards
+    .filter((board) => board.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => {
+      // Sort by favorite first (true before false), then by creation date (newest first)
+      if (a.is_favorite === b.is_favorite) {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      }
+      return a.is_favorite ? -1 : 1
+    })
 
   useEffect(() => {
     loadBoards()
@@ -95,7 +101,8 @@ export default function DashboardPage() {
         title: title.trim(),
         user_id: user?.id || '',
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        is_favorite: false
       }
 
       startTransition(() => {
@@ -110,6 +117,16 @@ export default function DashboardPage() {
       } finally {
         setIsBoardModalOpen(false)
       }
+    }
+  }
+
+  const handleToggleFavorite = async (boardId: number) => {
+    try {
+      const board = boards.find((board) => board.id === boardId)
+      if (!board) return
+      await updateBoard(boardId, { is_favorite: !board.is_favorite })
+    } catch (error) {
+      notifyError('Failed to toggle favorite', 'Please try again', error)
     }
   }
 
@@ -149,6 +166,7 @@ export default function DashboardPage() {
                 <DashboardGridItem
                   key={board.id}
                   board={board}
+                  onToggleFavorite={handleToggleFavorite}
                   onEditBoard={handleEditBoardModal}
                   onDeleteBoard={handleBoardToDeleteModal}
                 />
@@ -158,7 +176,7 @@ export default function DashboardPage() {
           ) : (
             <div className="flex flex-col space-y-2 w-full">
               {filteredBoards.map((board) => (
-                <DashboardListItem key={board.id} board={board} />
+                <DashboardListItem key={board.id} board={board} onToggleFavorite={handleToggleFavorite} />
               ))}
               <DashboardCreateBoard isGrid={false} handleCreateBoard={handleCreateBoard} />
             </div>

@@ -2,15 +2,17 @@ import Link from 'next/link'
 import { Button, Card, Tag, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
 import { Board } from '@/lib/supabase/models'
-import { EllipsisOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { EllipsisOutlined, EditOutlined, DeleteOutlined, StarOutlined, StarFilled } from '@ant-design/icons'
 
 export default function DashboardGridItem({
   board,
   onEditBoard,
+  onToggleFavorite,
   onDeleteBoard
 }: {
   board: Board
   onEditBoard: (boardId: number) => void
+  onToggleFavorite: (boardId: number) => void
   onDeleteBoard: (boardId: number) => void
 }) {
   const isNewBoard = new Date(board.created_at) > new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)
@@ -22,6 +24,12 @@ export default function DashboardGridItem({
     } else if (key === 'delete') {
       onDeleteBoard(board.id)
     }
+  }
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    onToggleFavorite(board.id)
   }
 
   const menuItems: MenuProps['items'] = [
@@ -46,6 +54,7 @@ export default function DashboardGridItem({
   return (
     <Link key={board.id} href={`/boards/${board.id}`} className="flex flex-col group">
       <Card
+        className="group-hover:border-primary-500!"
         title={
           <div className="flex items-center space-x-2 group-hover:text-primary-500 transition-colors truncate">
             <span>{board.title}</span>
@@ -53,11 +62,20 @@ export default function DashboardGridItem({
           </div>
         }
         extra={
-          <Dropdown menu={{ items: menuItems }} trigger={['click']} placement="bottomRight">
-            <Button type="text" shape="circle" onClick={(e) => e.preventDefault()}>
-              <EllipsisOutlined />
+          <>
+            <Button type="text" shape="circle" onClick={handleToggleFavorite} title="Toggle favorite">
+              {board.is_favorite ? (
+                <StarFilled className="text-primary!" />
+              ) : (
+                <StarOutlined className="text-primary!" />
+              )}
             </Button>
-          </Dropdown>
+            <Dropdown menu={{ items: menuItems }} trigger={['click']} placement="bottomRight">
+              <Button type="text" shape="circle" onClick={(e) => e.preventDefault()}>
+                <EllipsisOutlined />
+              </Button>
+            </Dropdown>
+          </>
         }
         hoverable
       >

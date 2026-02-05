@@ -6,6 +6,7 @@ export interface Board {
   user_id: string
   created_at: string
   updated_at: string
+  is_favorite: boolean
 }
 
 export interface Column {

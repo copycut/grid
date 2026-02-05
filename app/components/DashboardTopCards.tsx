@@ -1,5 +1,5 @@
 import { Card } from 'antd'
-import { ProjectFilled, RocketFilled } from '@ant-design/icons'
+import { ProjectFilled, RocketFilled, StarFilled } from '@ant-design/icons'
 import { Board } from '@/lib/supabase/models'
 
 export default function DashboardTopCards({ boards }: { boards: Board[] }) {
@@ -13,6 +13,7 @@ export default function DashboardTopCards({ boards }: { boards: Board[] }) {
           </div>
         </div>
       </Card>
+
       <Card title="Recent Activity">
         <div className="flex items-center justify-between">
           <p className="text-xl sm:text-2xl font-bold">
@@ -24,6 +25,15 @@ export default function DashboardTopCards({ boards }: { boards: Board[] }) {
           </p>
           <div className="bg-green-200 dark:bg-green-900 rounded-lg p-2 flex items-center justify-center text-green-700 dark:text-green-500">
             <RocketFilled className=" text-2xl" />
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Total Favorites">
+        <div className="flex items-center justify-between">
+          <p className="text-xl sm:text-2xl font-bold">{boards.filter((board) => board.is_favorite).length}</p>
+          <div className="bg-yellow-200 dark:bg-yellow-900 rounded-lg p-2 flex items-center justify-center text-yellow-700 dark:text-yellow-500">
+            <StarFilled className=" text-2xl" />
           </div>
         </div>
       </Card>
