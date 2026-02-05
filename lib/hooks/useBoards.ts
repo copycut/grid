@@ -240,7 +240,7 @@ export function useBoard(boardId: number) {
       // If we update here, it causes a visual jump: optimistic update → revert → API update
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to move card')
-      // TODO: Revert the optimistic update on error
+      await loadBoard()
       throw error
     }
   }
@@ -268,6 +268,7 @@ export function useBoard(boardId: number) {
       await columnService.moveColumn(supabase!, columnId, newPosition)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to move column')
+      await loadBoard()
       throw error
     }
   }
