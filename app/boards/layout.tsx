@@ -1,9 +1,11 @@
+'use client'
 import SupabaseProvider from '@/lib/supabase/SupabaseProvider'
+import AuthGuard from '@/app/components/AuthGuard'
 
-export default function BoardsLayout({
-  children
-}: {
-  children: React.ReactNode
-}) {
-  return <SupabaseProvider>{children}</SupabaseProvider>
+export default function BoardsLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SupabaseProvider>
+      <AuthGuard>{children}</AuthGuard>
+    </SupabaseProvider>
+  )
 }
