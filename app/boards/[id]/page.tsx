@@ -58,8 +58,14 @@ export default function BoardPage() {
   const handleUpdateBoard = async (title: string) => {
     if (!board || !title.trim()) return
 
+    if (board.title === title.trim()) {
+      setIsBoardEditing(false)
+      return
+    }
+
     try {
       await updateBoard(board.id, { title: title.trim() })
+      notifySuccess('Board updated successfully')
     } catch (error) {
       notifyError('Failed to update board', 'Please try again.', error)
     } finally {
@@ -323,6 +329,7 @@ export default function BoardPage() {
             </DragOverlay>
           </DndContext>
         </main>
+
         <ColumnEditionModal
           isOpen={isEditingColumn}
           column={columnToEdit}
@@ -331,6 +338,7 @@ export default function BoardPage() {
           onEdit={(column) => handleUpdateColumn(column)}
           onDeleteColumn={(columnId) => handleDeleteColumn(columnId)}
         />
+
         <CardEditionModal
           isOpen={isAddingCard}
           columnTargetId={columnTargetId}
@@ -342,12 +350,14 @@ export default function BoardPage() {
           onSave={(newCard: NewCard, columnId: number) => handleCreateCard(newCard, columnId)}
           onDelete={(cardId: number) => handleDeleteCard(cardId)}
         />
+
         <BoardEditionModal
           isOpen={isBoardEditing}
           board={board}
           onClose={() => setIsBoardEditing(false)}
           onSubmit={(title: string) => handleUpdateBoard(title)}
         />
+
         <BoardFiltersModal
           isOpen={isFiltering}
           filters={filters}

@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isBoardDeletion, setIsBoardDeletion] = useState(false)
   const [boardIdToDelete, setBoardIdToDelete] = useState<number | null>(null)
-  const [isBoardEditing, setIsBoardEditing] = useState(false)
+  const [isBoardModalOpen, setIsBoardModalOpen] = useState(false)
   const [boardToEdit, setBoardToEdit] = useState<Board | null>(null)
   const { notifySuccess, notifyError } = useNotification()
 
@@ -55,44 +55,61 @@ export default function DashboardPage() {
     }
   }
 
-  const handleCreateBoard = async () => {
-    const tempId = Date.now()
-    const optimisticBoard = {
-      id: tempId,
-      title: 'New Board',
-      user_id: user?.id || '',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-
-    startTransition(() => {
-      updateOptimisticBoards({ type: 'create', board: optimisticBoard })
-    })
-
-    try {
-      await createBoard({ title: 'New Board' })
-      notifySuccess('Board created successfully')
-    } catch (error) {
-      notifyError('Failed to create board', 'Please try again', error)
-    }
+  const handleCreateBoard = () => {
+    // Open modal for creating a new board
+    setBoardToEdit(null)
+    setIsBoardModalOpen(true)
   }
 
   const handleEditBoardModal = (boardId: number) => {
     setBoardToEdit(boards.find((board) => board.id === boardId) || null)
-    setIsBoardEditing(true)
+    setIsBoardModalOpen(true)
   }
 
-  const handleUpdateBoard = async (title: string) => {
-    if (!boardToEdit || !title.trim()) return
+  const handleBoardSubmit = async (title: string, createDefaultColumns: boolean) => {
+    if (!title.trim()) return
 
-    try {
-      await updateBoard(boardToEdit.id, { title: title.trim() })
-      notifySuccess('Board updated successfully')
-    } catch (error) {
-      notifyError('Failed to update board', 'Please try again', error)
-    } finally {
-      setIsBoardEditing(false)
-      setBoardToEdit(null)
+    if (boardToEdit) {
+      // Update existing board
+
+      if (boardToEdit.title === title.trim()) {
+        setIsBoardModalOpen(false)
+        setBoardToEdit(null)
+        return
+      }
+
+      try {
+        await updateBoard(boardToEdit.id, { title: title.trim() })
+        notifySuccess('Board updated successfully')
+      } catch (error) {
+        notifyError('Failed to update board', 'Please try again', error)
+      } finally {
+        setIsBoardModalOpen(false)
+        setBoardToEdit(null)
+      }
+    } else {
+      // Create new board
+      const tempId = Date.now()
+      const optimisticBoard = {
+        id: tempId,
+        title: title.trim(),
+        user_id: user?.id || '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+
+      startTransition(() => {
+        updateOptimisticBoards({ type: 'create', board: optimisticBoard })
+      })
+
+      try {
+        await createBoard({ title: title.trim(), createDefaultColumns })
+        notifySuccess('Board created successfully')
+      } catch (error) {
+        notifyError('Failed to create board', 'Please try again', error)
+      } finally {
+        setIsBoardModalOpen(false)
+      }
     }
   }
 
@@ -150,10 +167,13 @@ export default function DashboardPage() {
       </main>
 
       <BoardEditionModal
-        isOpen={isBoardEditing}
+        isOpen={isBoardModalOpen}
         board={boardToEdit}
-        onClose={() => setIsBoardEditing(false)}
-        onSubmit={(title: string) => handleUpdateBoard(title)}
+        onClose={() => {
+          setIsBoardModalOpen(false)
+          setBoardToEdit(null)
+        }}
+        onSubmit={handleBoardSubmit}
       />
 
       <BoardDeleteModal

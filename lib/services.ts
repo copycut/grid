@@ -253,6 +253,15 @@ export const boardDataService = {
     return { board, columns: columnsWithCards }
   },
 
+  async createBoardWithoutColumns(supabase: SupabaseClient, boardData: { title: string; user_id: string }) {
+    const board = await boardService.createBoard(supabase, {
+      title: boardData.title,
+      user_id: boardData.user_id
+    })
+
+    return { board, columns: [] }
+  },
+
   async createBoardWithDefaultColumns(supabase: SupabaseClient, boardData: { title: string; user_id: string }) {
     const board = await boardService.createBoard(supabase, {
       title: boardData.title,

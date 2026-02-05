@@ -27,15 +27,20 @@ export function useBoards() {
     }
   }
 
-  async function createBoard(boardData: { title: string }) {
+  async function createBoard(boardData: { title: string; createDefaultColumns?: boolean }) {
     if (!user?.id) throw new Error('User not authenticated')
 
     try {
       setLoading(true)
-      const { board } = await boardDataService.createBoardWithDefaultColumns(supabase!, {
-        ...boardData,
-        user_id: user?.id
-      })
+      const { board } = boardData.createDefaultColumns
+        ? await boardDataService.createBoardWithDefaultColumns(supabase!, {
+            title: boardData.title,
+            user_id: user?.id
+          })
+        : await boardDataService.createBoardWithoutColumns(supabase!, {
+            title: boardData.title,
+            user_id: user?.id
+          })
       setBoards((prev) => [board, ...prev])
       return board
     } catch (error) {
