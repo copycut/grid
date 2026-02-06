@@ -5,6 +5,7 @@ import { Filter, Priority } from '@/types/types'
 export default function BoardHeader({
   filteredCardsCount,
   totalCardsCount,
+  filterCount,
   filters,
   filterOptions,
   onResetFilters,
@@ -12,6 +13,7 @@ export default function BoardHeader({
 }: {
   filteredCardsCount: number
   totalCardsCount: number
+  filterCount: number
   filters: Filter
   filterOptions: { priority: { value: string; label: string; color: string }[] }
   onResetFilters: () => void
@@ -22,12 +24,12 @@ export default function BoardHeader({
       <div className="flex flex-wrap items-center gap-4 sm:gap-6 pb-2">
         <div className="text-sm text-gray-600 dark:text-white/50">
           <span className="font-medium">Total cards: </span>
-          {filteredCardsCount !== totalCardsCount && <span>{filteredCardsCount}/</span>}
+          {filterCount > 0 && <span>{filteredCardsCount}/</span>}
           <span>{totalCardsCount}</span>
         </div>
 
-        {filteredCardsCount !== totalCardsCount && (
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-white/50">
+        {filterCount > 0 && (
+          <div className="flex items-center flex-wrap gap-2 text-sm text-gray-600 dark:text-white/50">
             <span className="font-medium">Filters:</span>
             {filters.priority?.map((priority) => (
               <Tag key={priority} color={filterOptions.priority.find((option) => option.value === priority)?.color}>

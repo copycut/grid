@@ -301,6 +301,7 @@ export default function BoardPage() {
           <BoardHeader
             filteredCardsCount={filteredCardsCount}
             totalCardsCount={totalCardsCount}
+            filterCount={filterCount()}
             filters={filters}
             filterOptions={filterOptions}
             onResetFilters={handleResetFilters}
