@@ -34,23 +34,24 @@ export default function Home() {
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-gray-300 mb-6">
-            Organize work and life, <span className="text-primary-600">finally.</span>
+            Enter the <span className="text-primary-600">Grid.</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-            Grid helps teams move work forward. Collaborate, manage projects, and reach new productivity peaks. From
-            high rises to the home office, the way your team works is unique—accomplish it all with Grid.
+            A digital realm where your ideas take form and your work comes to life. Navigate through your projects with
+            precision, organize tasks in a space designed for clarity, and watch your productivity materialize in
+            real-time.
           </p>
-          <HomePageSignInButton>Get Started</HomePageSignInButton>
+          <HomePageSignInButton>Start Building</HomePageSignInButton>
         </div>
       </section>
 
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-300 mb-4">
-            Everything you need to stay organized
+            Built for the digital workspace
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Powerful features to help your team collaborate and get more done.
+            Seamlessly navigate your projects in a space where efficiency meets innovation.
           </p>
         </div>
 
@@ -69,12 +70,12 @@ export default function Home() {
 
       <section className="bg-primary-600 py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to get started?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to enter the Grid?</h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of teams who are already using Grid to organize their work.
+            Step into a digital workspace where your projects flow seamlessly and productivity becomes second nature.
           </p>
 
-          <HomePageSignInButton color="default">Start your free trial</HomePageSignInButton>
+          <HomePageSignInButton color="default">Enter the Grid</HomePageSignInButton>
         </div>
       </section>
 

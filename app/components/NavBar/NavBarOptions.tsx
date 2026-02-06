@@ -53,7 +53,7 @@ export default function NavBarOptions({
     return (
       <SignUpButton>
         <Button color="primary" variant="solid">
-          Enter the Grid
+          Begin Your Journey
         </Button>
       </SignUpButton>
     )
