@@ -103,7 +103,7 @@ export default function BoardFiltersModal({
     >
       <Form form={filterForm} initialValues={{ priority: [] }}>
         <Form.Item label="Priority" name="priority">
-          <div className="flex space-x-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             {priorities.priority.map((priorityItem) => (
               <Button
                 key={priorityItem.value}

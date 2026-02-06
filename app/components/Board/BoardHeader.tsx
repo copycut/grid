@@ -18,7 +18,7 @@ export default function BoardHeader({
   onAddCard: () => void
 }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 space-x-4 sm:space-x-0 px-2 sm:px-4 ">
+    <div className="flex items-center justify-between gap-2 pb-6 px-2 ">
       <div className="flex flex-wrap items-center gap-4 sm:gap-6 pb-2">
         <div className="text-sm text-gray-600 dark:text-white/50">
           <span className="font-medium">Total cards: </span>

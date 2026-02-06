@@ -42,7 +42,7 @@ export default function NavBarOptions({
       <div className="flex items-center space-x-4">
         <Button icon={<FilterOutlined />} onClick={onFilter}>
           <span className="hidden sm:inline">Filter</span>
-          <Badge count={filterCount} />
+          {filterCount > 0 && <Badge count={filterCount} />}
         </Button>
         <UserButton />
       </div>
