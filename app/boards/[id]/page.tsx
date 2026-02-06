@@ -4,7 +4,15 @@ import { Filter, NewCard } from '@/types/types'
 import { Column as ColumnType, Card as CardType, ColumnWithCards } from '@/lib/supabase/models'
 import { useParams } from 'next/navigation'
 import { SortableContext } from '@dnd-kit/sortable'
-import { DndContext, DragOverlay, PointerSensor, rectIntersection, useSensor, useSensors } from '@dnd-kit/core'
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  TouchSensor,
+  rectIntersection,
+  useSensor,
+  useSensors
+} from '@dnd-kit/core'
 import { horizontalListSortingStrategy, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoard } from '@/lib/hooks/useBoards'
 import { useDragAndDrop } from '@/lib/hooks/useDragAndDrop'
@@ -47,7 +55,10 @@ export default function BoardPage() {
   const [columnTargetId, setColumnTargetId] = useState<number | null>(null)
   const [isEditingColumn, setIsEditingColumn] = useState(false)
   const [columnToEdit, setColumnToEdit] = useState<ColumnType | null>(null)
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+  const sensors = useSensors(
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  )
   const { activeCard, activeColumn, handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop(
     columns,
     setColumns,
@@ -333,12 +344,16 @@ export default function BoardPage() {
               </div>
             </SortableContext>
             <DragOverlay>
-              {activeCard && <Card card={activeCard} priorityOptions={filterOptions.priority} onEditCard={() => {}} />}
+              {activeCard && (
+                <div style={{ transform: 'rotate(2.5deg) scale(1.05)' }}>
+                  <Card card={activeCard} priorityOptions={filterOptions.priority} />
+                </div>
+              )}
               {activeColumn && (
-                <Column column={activeColumn} onCreateCard={() => {}} onEditColumn={() => {}}>
+                <Column column={activeColumn}>
                   <div className="p-4 space-y-2">
                     {activeColumn.cards.map((card) => (
-                      <Card key={card.id} card={card} priorityOptions={filterOptions.priority} onEditCard={() => {}} />
+                      <Card key={card.id} card={card} priorityOptions={filterOptions.priority} />
                     ))}
                   </div>
                 </Column>
