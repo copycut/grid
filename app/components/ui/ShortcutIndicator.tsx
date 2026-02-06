@@ -7,9 +7,16 @@ export default function ShortcutIndicator({
   children: React.ReactNode
   color?: string
 }) {
-  // detect if the user is on mac or windows to display the correct shortcut
+  const isMobile = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  }
+
   const isMac = () => {
     return /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
+  }
+
+  if (isMobile()) {
+    return null
   }
 
   return (
