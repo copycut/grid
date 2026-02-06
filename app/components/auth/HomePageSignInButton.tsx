@@ -1,7 +1,8 @@
 'use client'
-import { SignInButton, SignUpButton } from '@clerk/clerk-react'
+import { SignUpButton } from '@clerk/clerk-react'
 import { useUser } from '@clerk/clerk-react'
 import { Button } from 'antd'
+import Link from 'next/link'
 
 export default function HomePageSignInButton({
   children,
@@ -13,11 +14,11 @@ export default function HomePageSignInButton({
   const { isSignedIn } = useUser()
 
   return isSignedIn ? (
-    <SignInButton>
+    <Link href="/dashboard">
       <Button size="large" color={color} variant="solid">
         {children}
       </Button>
-    </SignInButton>
+    </Link>
   ) : (
     <SignUpButton>
       <Button size="large" color={color} variant="solid">
