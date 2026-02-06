@@ -100,6 +100,7 @@ export default function CardEditionModal({
       title={card ? 'Edit Card' : 'New Card'}
       open={isOpen}
       forceRender
+      centered
       okText={card ? 'Save' : 'Add'}
       onOk={handleSave}
       onCancel={onClose}
@@ -112,6 +113,12 @@ export default function CardEditionModal({
           <span>{card ? 'Save' : 'Add'}</span>
         </Button>
       ]}
+      styles={{
+        body: {
+          maxHeight: 'calc(100vh - 150px)',
+          overflowY: 'auto'
+        }
+      }}
     >
       <Form form={createCardForm} layout="vertical">
         <div className="grid grid-cols-2 gap-4">

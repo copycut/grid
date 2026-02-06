@@ -64,6 +64,7 @@ export default function ColumnEditionModal({
       okText={column ? 'Save' : 'Add'}
       onCancel={onClose}
       forceRender
+      centered
       footer={[
         <Button key="cancel" onClick={onClose}>
           Cancel

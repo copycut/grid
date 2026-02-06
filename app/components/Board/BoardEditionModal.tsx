@@ -66,6 +66,7 @@ export default function BoardEditionModal({
       okText={isEditMode ? 'Save' : 'Create'}
       onCancel={onClose}
       forceRender
+      centered
       footer={[
         <Button key="cancel" onClick={onClose}>
           Cancel

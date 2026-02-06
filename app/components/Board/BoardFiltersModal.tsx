@@ -87,6 +87,7 @@ export default function BoardFiltersModal({
       okText="Apply"
       onOk={handleSubmit}
       onCancel={onClose}
+      centered
       footer={[
         <Button key="cancel" onClick={onClose}>
           Cancel

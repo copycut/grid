@@ -51,18 +51,11 @@ export default function NavBarOptions({
 
   if (!isSignedIn) {
     return (
-      <div className="flex items-center space-x-2">
-        <SignInButton>
-          <Button color="default" variant="solid">
-            Sign In
-          </Button>
-        </SignInButton>
-        <SignUpButton>
-          <Button color="primary" variant="solid">
-            Sign Up
-          </Button>
-        </SignUpButton>
-      </div>
+      <SignUpButton>
+        <Button color="primary" variant="solid">
+          Enter the Grid
+        </Button>
+      </SignUpButton>
     )
   }
 }

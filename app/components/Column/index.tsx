@@ -51,8 +51,8 @@ export default function Column({
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 min-w-0">
-              <h3 className="font-bold truncated">{column.title}</h3>
-              <Tag>{column.cards.length}</Tag>
+              <h3 className="font-bold truncated user-select-none">{column.title}</h3>
+              <Tag className="user-select-none">{column.cards.length}</Tag>
             </div>
             <Button type="text" shape="circle" icon={<EllipsisOutlined />} onClick={onEditColumn} />
           </div>
