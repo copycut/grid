@@ -87,8 +87,22 @@ export default function Home() {
               <span className="text-xl font-bold">Grid</span>
             </div>
             <div className="flex items-center space-x-6 text-sm text-gray-400">
-              <span>© {new Date().getFullYear()} Grid. Free Project.</span>
-              <span>Built with Next.js & Clerk</span>
+              <span className="flex items-center space-x-1">
+                <span>© {new Date().getFullYear()} Grid.</span>
+                <a href="https://github.com/copycut/grid" target="_blank">
+                  Free Project
+                </a>
+              </span>
+              <span className="flex items-center space-x-1">
+                <span>Built with</span>
+                <a href="https://nextjs.org/" target="_blank">
+                  Next.js
+                </a>
+                <span>&</span>
+                <a href="https://clerk.com/" target="_blank">
+                  Clerk
+                </a>
+              </span>
             </div>
           </div>
         </div>
