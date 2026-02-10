@@ -33,7 +33,7 @@ export default function SupabaseProvider({ children }: { children: React.ReactNo
         accessToken: async () => session.getToken() ?? null
       }
     )
-  }, [session, sessionLoaded])
+  }, [sessionLoaded])
 
   const value = useMemo(() => ({ supabase, isLoaded: sessionLoaded }), [supabase, sessionLoaded])
 
