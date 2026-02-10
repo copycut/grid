@@ -7,6 +7,7 @@ import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function ColumnEditionModal({
+  loading,
   isOpen,
   onClose,
   column,
@@ -14,6 +15,7 @@ export default function ColumnEditionModal({
   onEdit,
   onDeleteColumn
 }: {
+  loading: boolean
   isOpen: boolean
   onClose: () => void
   onSave: (title: string) => void
@@ -22,7 +24,7 @@ export default function ColumnEditionModal({
   column: ColumnWithCards | Column | null
 }) {
   const [columnForm] = Form.useForm()
-  const [title, setTitle] = useState('')
+  const [title, setTitle] = useState(column?.title || '')
   const titleInputRef = useRef<InputRef>(null)
 
   useEffect(() => {
@@ -32,20 +34,23 @@ export default function ColumnEditionModal({
       }, 100)
 
       if (column) {
-        setTitle(column.title)
         columnForm.setFieldsValue({ title: column.title })
+      } else {
+        columnForm.resetFields()
       }
-    } else {
-      setTitle('')
-      columnForm.resetFields()
     }
   }, [isOpen, column, columnForm])
 
   const handleSubmit = () => {
     columnForm.validateFields().then(() => {
-      if (title.trim()) {
-        column ? onEdit({ ...column, title, cards: 'cards' in column ? column.cards : [] }) : onSave(title.trim())
+      if (!title.trim()) return
+
+      if (column) {
+        onEdit({ ...column, title, cards: 'cards' in column ? column.cards : [] })
+        return
       }
+
+      onSave(title)
     })
   }
 
@@ -69,7 +74,7 @@ export default function ColumnEditionModal({
         <Button key="cancel" onClick={onClose}>
           Cancel
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
+        <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
           <ShortcutIndicator>⏎</ShortcutIndicator>
           <span>{column ? 'Save' : 'Add'}</span>
         </Button>

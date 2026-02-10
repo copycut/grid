@@ -1,6 +1,6 @@
 import { Button, Tag } from 'antd'
 import { PlusOutlined, CloseOutlined } from '@ant-design/icons'
-import { Filter, Priority } from '@/types/types'
+import { Filter } from '@/types/types'
 
 export default function BoardHeader({
   filteredCardsCount,

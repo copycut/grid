@@ -17,7 +17,7 @@ import LoaderPlaceHolder from '@/app/components/ui/LoaderPlaceHolder'
 
 export default function DashboardPage() {
   const { user } = useUser()
-  const { loadBoards, createBoard, boards, loading, deleteBoard, updateBoard } = useBoards()
+  const { loading, boards, loadBoards, createBoard, deleteBoard, updateBoard } = useBoards()
   const { optimisticBoards, updateOptimisticBoards } = useOptimisticBoards(boards)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
@@ -39,7 +39,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadBoards()
-  }, [])
+  }, [loadBoards])
 
   const handleBoardToDeleteModal = (boardID: number) => {
     setBoardIdToDelete(boardID)
@@ -140,7 +140,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-300 pb-2 m-0">
             Welcome back, {user?.firstName ?? user?.emailAddresses[0]?.emailAddress}! 👋
           </h1>
-          <p className="text-gray-600 dark:text-gray-500">Here what's happening in your Grid today</p>
+          <p className="text-gray-600 dark:text-gray-500">Here what&rsquo;s happening in your Grid today</p>
         </div>
 
         <DashboardTopCards boards={optimisticBoards} />
@@ -174,7 +174,7 @@ export default function DashboardPage() {
                   onDeleteBoard={handleBoardToDeleteModal}
                 />
               ))}
-              <DashboardCreateBoard isGrid={true} handleCreateBoard={handleCreateBoard} />
+              {!loading && <DashboardCreateBoard isGrid={true} handleCreateBoard={handleCreateBoard} />}
             </div>
           ) : (
             <div className="flex flex-col space-y-2 w-full">
@@ -183,13 +183,14 @@ export default function DashboardPage() {
               {filteredBoards.map((board) => (
                 <DashboardListItem key={board.id} board={board} onToggleFavorite={handleToggleFavorite} />
               ))}
-              <DashboardCreateBoard isGrid={false} handleCreateBoard={handleCreateBoard} />
+              {!loading && <DashboardCreateBoard isGrid={false} handleCreateBoard={handleCreateBoard} />}
             </div>
           )}
         </div>
       </main>
 
       <BoardEditionModal
+        loading={loading}
         isOpen={isBoardModalOpen}
         board={boardToEdit}
         onClose={() => {
@@ -200,6 +201,7 @@ export default function DashboardPage() {
       />
 
       <BoardDeleteModal
+        loading={loading}
         isOpen={isBoardDeletion}
         boardId={boardIdToDelete}
         onClose={() => setIsBoardDeletion(false)}

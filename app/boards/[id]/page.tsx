@@ -14,7 +14,7 @@ import {
   useSensors
 } from '@dnd-kit/core'
 import { horizontalListSortingStrategy, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { useBoard } from '@/lib/hooks/useBoards'
+import { useBoard } from '@/lib/hooks/useBoard'
 import { useDragAndDrop } from '@/lib/hooks/useDragAndDrop'
 import { useOptimisticColumns } from '@/lib/hooks/useOptimisticColumns'
 import { useNotification } from '@/lib/utils/notifications'
@@ -34,6 +34,7 @@ export default function BoardPage() {
   const boardId = Number(id)
   const {
     loading,
+    loadingBoard,
     board,
     columns,
     updateBoard,
@@ -297,6 +298,7 @@ export default function BoardPage() {
           onFilter={() => setIsFiltering(true)}
           filterCount={filterCount()}
         />
+
         <main className="py-4 sm:py-6">
           <BoardHeader
             filteredCardsCount={filteredCardsCount}
@@ -320,7 +322,7 @@ export default function BoardPage() {
                 id="board"
                 className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 space-y-4 lg:space-y-0 min-h-dvh"
               >
-                {loading && <LoaderPlaceHolder />}
+                {loadingBoard && <LoaderPlaceHolder />}
 
                 {filteredColumns?.map((column) => (
                   <Column
@@ -344,6 +346,7 @@ export default function BoardPage() {
                 <AddColumnButton onAddColumn={() => handleEditColumnModal(null)} />
               </div>
             </SortableContext>
+
             <DragOverlay>
               {activeCard && (
                 <div style={{ transform: 'rotate(2.5deg) scale(1.05)' }}>
@@ -364,6 +367,7 @@ export default function BoardPage() {
         </main>
 
         <ColumnEditionModal
+          loading={loading}
           isOpen={isEditingColumn}
           column={columnToEdit}
           onClose={() => setIsEditingColumn(false)}
@@ -373,6 +377,7 @@ export default function BoardPage() {
         />
 
         <CardEditionModal
+          loading={loading}
           isOpen={isAddingCard}
           columnTargetId={columnTargetId}
           columns={columns}
@@ -385,6 +390,7 @@ export default function BoardPage() {
         />
 
         <BoardEditionModal
+          loading={loading}
           isOpen={isBoardEditing}
           board={board}
           onClose={() => setIsBoardEditing(false)}

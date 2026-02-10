@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import { Card } from 'antd'
 import { ProjectFilled, RocketFilled, StarFilled } from '@ant-design/icons'
 import { Board } from '@/lib/supabase/models'
 import { cn } from '@/lib/utils'
 
 export default function DashboardTopCards({ boards }: { boards: Board[] }) {
+  const [now] = useState(() => Date.now())
+  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000
+
   const cardContent = [
     {
       title: 'Total Boards',
@@ -16,7 +20,7 @@ export default function DashboardTopCards({ boards }: { boards: Board[] }) {
       icon: RocketFilled,
       colorClasses: 'bg-green-200 dark:bg-green-900 text-green-700 dark:text-green-500',
       value: boards.filter((board) => {
-        return new Date(board.created_at) > new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)
+        return new Date(board.updated_at).getTime() > sevenDaysAgo
       }).length
     },
     {

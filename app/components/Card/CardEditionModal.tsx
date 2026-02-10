@@ -7,6 +7,7 @@ import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function CardEditionModal({
+  loading,
   isOpen,
   columnTargetId,
   columns,
@@ -17,6 +18,7 @@ export default function CardEditionModal({
   onSave,
   onDelete
 }: {
+  loading: boolean
   isOpen: boolean
   columnTargetId: number | null | undefined
   columns: ColumnType[]
@@ -30,10 +32,11 @@ export default function CardEditionModal({
   const [createCardForm] = Form.useForm()
   const { TextArea } = Input
   const [editedCard, setNewCard] = useState<NewCard | CardType>({
-    title: '',
-    description: '',
-    priority: 'default',
-    column_id: 0
+    ...card,
+    title: card?.title || '',
+    description: card?.description || '',
+    priority: card?.priority || 'default',
+    column_id: columnTargetId || columns[0]?.id || 0
   })
   const titleInputRef = useRef<InputRef>(null)
   // Antd Select captures the Escape keydown event and doesn't trigger the onClose function
@@ -48,7 +51,6 @@ export default function CardEditionModal({
         priority: card?.priority || 'default',
         column_id: columnTargetId || columns[0]?.id
       }
-      setNewCard(cardData)
       createCardForm.setFieldsValue({
         column_id: cardData.column_id,
         title: cardData.title,
@@ -66,11 +68,10 @@ export default function CardEditionModal({
 
   const handleSave = () => {
     createCardForm.validateFields().then(() => {
-      if (editedCard.title.trim()) {
-        card
-          ? onEdit(editedCard as CardType, editedCard.column_id!)
-          : onSave(editedCard as NewCard, editedCard.column_id!)
-      }
+      if (!editedCard.title.trim()) return
+
+      const action = card ? onEdit : onSave
+      action(editedCard as CardType, editedCard.column_id!)
     })
   }
 
@@ -108,7 +109,7 @@ export default function CardEditionModal({
         <Button key="cancel" onClick={onClose}>
           Cancel
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSave}>
+        <Button key="submit" type="primary" loading={loading} onClick={handleSave}>
           <ShortcutIndicator>⏎</ShortcutIndicator>
           <span>{card ? 'Save' : 'Add'}</span>
         </Button>

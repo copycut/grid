@@ -39,7 +39,7 @@ export default function Column({
   }, [])
 
   return (
-    <div ref={setNodeRef} style={style} className="w-full lg:shrink-0 lg:w-80 pt-1">
+    <div ref={setNodeRef} style={style} className="w-full lg:shrink-0 lg:w-80">
       <div
         className={`${isOver ? 'ring-2 ring-primary-500' : ''} bg-white dark:bg-black rounded-2xl shadow-sm border border-gray-300 dark:border-gray-700 transition-all`}
       >

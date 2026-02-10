@@ -5,18 +5,20 @@ import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function BoardEditionModal({
+  loading,
   isOpen,
   onClose,
   board,
   onSubmit
 }: {
+  loading: boolean
   isOpen: boolean
   board: Board | null
   onClose: () => void
   onSubmit: (title: string, createDefaultColumns: boolean) => void
 }) {
   const [form] = Form.useForm()
-  const [title, setTitle] = useState('')
+  const [title, setTitle] = useState(board?.title || '')
   const [createDefaultColumns, setCreateDefaultColumns] = useState(true)
   const titleInputRef = useRef<InputRef>(null)
   const isEditMode = !!board
@@ -28,26 +30,18 @@ export default function BoardEditionModal({
       }, 100)
 
       if (board) {
-        setTitle(board.title)
         form.setFieldsValue({ title: board.title })
       } else {
-        setTitle('')
-        setCreateDefaultColumns(true)
         form.resetFields()
         form.setFieldsValue({ createDefaultColumns: true })
       }
-    } else {
-      setTitle('')
-      setCreateDefaultColumns(true)
-      form.resetFields()
     }
   }, [isOpen, board, form])
 
   const handleSubmit = () => {
     form.validateFields().then(() => {
-      if (title.trim()) {
-        onSubmit(title, createDefaultColumns)
-      }
+      if (!title.trim()) return
+      onSubmit(title, createDefaultColumns)
     })
   }
 
@@ -71,7 +65,7 @@ export default function BoardEditionModal({
         <Button key="cancel" onClick={onClose}>
           Cancel
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
+        <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
           <ShortcutIndicator>⏎</ShortcutIndicator>
           <span>{isEditMode ? 'Save' : 'Create'}</span>
         </Button>
@@ -87,7 +81,6 @@ export default function BoardEditionModal({
         >
           <Input ref={titleInputRef} type="text" onChange={(e) => setTitle(e.target.value)} />
         </Form.Item>
-
         {!isEditMode && (
           <Form.Item name="createDefaultColumns" valuePropName="checked">
             <Checkbox checked={createDefaultColumns} onChange={(e) => setCreateDefaultColumns(e.target.checked)}>

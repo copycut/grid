@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Link from 'next/link'
 import { Button, Card, Tag, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
@@ -15,7 +16,9 @@ export default function DashboardGridItem({
   onToggleFavorite: (boardId: number) => void
   onDeleteBoard: (boardId: number) => void
 }) {
-  const isNewBoard = new Date(board.created_at) > new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)
+  const [now] = useState(() => Date.now())
+  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000
+  const isNewBoard = new Date(board.updated_at).getTime() > sevenDaysAgo
 
   const handleMenuClick = (e: React.MouseEvent, key: string) => {
     e.preventDefault()

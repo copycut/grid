@@ -1,6 +1,5 @@
 import { BorderHorizontalOutlined, BorderVerticleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { Button, Input } from 'antd'
-import { Board } from '@/lib/supabase/models'
 
 export default function DashboardFilters({
   viewMode,

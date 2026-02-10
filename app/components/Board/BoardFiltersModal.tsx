@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Filter, Priority } from '@/types/types'
 import { Button, Form, Modal } from 'antd'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
@@ -22,12 +22,6 @@ export default function BoardFiltersModal({
 }) {
   const [filterForm] = Form.useForm()
   const [modalFilters, setModalFilters] = useState<Filter>(filters)
-
-  useEffect(() => {
-    if (isOpen) {
-      setModalFilters(filters)
-    }
-  }, [isOpen, filters])
 
   const handleResetForm = () => {
     filterForm.resetFields()
@@ -78,8 +72,6 @@ export default function BoardFiltersModal({
     preventDefault: true
   })
 
-  const possiblesColors = ['bg-gray-500', 'bg-green-500', 'bg-orange-500', 'bg-red-500']
-
   return (
     <Modal
       title="Filter Board"
@@ -92,7 +84,7 @@ export default function BoardFiltersModal({
         <Button key="cancel" onClick={onClose}>
           Cancel
         </Button>,
-        <Button htmlType="reset" onClick={handleResetForm}>
+        <Button key="reset" htmlType="reset" onClick={handleResetForm}>
           <ShortcutIndicator>⌫</ShortcutIndicator>
           Reset filters
         </Button>,
