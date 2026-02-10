@@ -1,4 +1,5 @@
-import { boardDataService, boardService } from '@/lib/services'
+import { boardDataService } from '@/lib/services/board-data.service'
+import { boardService } from '@/lib/services/board.service'
 import { useUser } from '@clerk/clerk-react'
 import { useCallback, useState } from 'react'
 import { Board } from '@/lib/supabase/models'
@@ -56,9 +57,11 @@ export function useBoards() {
 
   const updateBoard = useCallback(
     async (boardId: number, updates: Partial<Board>) => {
+      if (!user?.id) throw new Error('User not authenticated')
+
       try {
         setLoading(true)
-        const updatedBoard = await boardService.updateBoard(supabase!, boardId, updates)
+        const updatedBoard = await boardService.updateBoard(supabase!, boardId, updates, user.id)
         setBoards((prev) => prev.map((board) => (board.id === updatedBoard.id ? updatedBoard : board)))
         return updatedBoard
       } catch (error) {
@@ -68,14 +71,16 @@ export function useBoards() {
         setLoading(false)
       }
     },
-    [supabase]
+    [user?.id, supabase]
   )
 
   const deleteBoard = useCallback(
     async (boardId: number) => {
+      if (!user?.id) throw new Error('User not authenticated')
+
       try {
         setLoading(true)
-        await boardService.deleteBoard(supabase!, boardId)
+        await boardService.deleteBoard(supabase!, boardId, user.id)
         setBoards((prev) => prev.filter((board) => board.id !== boardId))
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to delete board')
@@ -84,7 +89,7 @@ export function useBoards() {
         setLoading(false)
       }
     },
-    [supabase]
+    [user?.id, supabase]
   )
 
   return { loading, error, boards, createBoard, loadBoards, updateBoard, deleteBoard }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card } from 'antd'
 import { ProjectFilled, RocketFilled, StarFilled } from '@ant-design/icons'
 import { Board } from '@/lib/supabase/models'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/classnames'
 
 export default function DashboardTopCards({ boards }: { boards: Board[] }) {
   const [now] = useState(() => Date.now())
