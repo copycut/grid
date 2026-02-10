@@ -73,23 +73,15 @@ export const columnService = {
   },
 
   async moveColumn(supabase: SupabaseClient, columnId: number, newPosition: number) {
-    await supabase.from('columns').update({ position: newPosition }).eq('id', columnId)
+    // Use PostgreSQL function for batch update (eliminates N+1 query problem)
+    const { error } = await supabase.rpc('move_column_batch', {
+      p_column_id: columnId,
+      p_new_position: newPosition
+    })
 
-    // Reorder all columns in the board
-    const { data: column } = await supabase.from('columns').select('board_id').eq('id', columnId).single()
-
-    if (column) {
-      const { data: allColumns } = await supabase
-        .from('columns')
-        .select('id')
-        .eq('board_id', column.board_id)
-        .order('position')
-
-      if (allColumns) {
-        await Promise.all(
-          allColumns.map((col, index) => supabase.from('columns').update({ position: index }).eq('id', col.id))
-        )
-      }
+    if (error) {
+      console.error('Error moving column:', error)
+      throw error
     }
   }
 }
@@ -130,98 +122,15 @@ export const cardService = {
   },
 
   async moveCard(supabase: SupabaseClient, cardId: number, newColumnId: number, newPosition: number) {
-    // Get the card being moved
-    const { data: movingCard } = await supabase.from('cards').select('column_id, position').eq('id', cardId).single()
-
-    if (!movingCard) throw new Error('Card not found')
-
-    const oldColumnId = movingCard.column_id
-    const oldPosition = movingCard.position
-
-    // Get all cards in the target column (before moving)
-    const { data: targetColumnCards } = await supabase
-      .from('cards')
-      .select('id, position')
-      .eq('column_id', newColumnId)
-      .order('position')
-
-    if (!targetColumnCards) return
-
-    // If moving within the same column
-    if (oldColumnId === newColumnId) {
-      // Adjust positions for cards between old and new position
-      if (oldPosition < newPosition) {
-        // Moving down: shift cards between old and new position up
-        const cardsToUpdate = targetColumnCards.filter(
-          (card) => card.position > oldPosition && card.position <= newPosition
-        )
-
-        const updates = cardsToUpdate.map((card) =>
-          supabase
-            .from('cards')
-            .update({ position: card.position - 1 })
-            .eq('id', card.id)
-        )
-
-        await Promise.all(updates)
-      } else if (oldPosition > newPosition) {
-        // Moving up: shift cards between new and old position down
-        const cardsToUpdate = targetColumnCards.filter(
-          (card) => card.position >= newPosition && card.position < oldPosition
-        )
-
-        const updates = cardsToUpdate.map((card) =>
-          supabase
-            .from('cards')
-            .update({ position: card.position + 1 })
-            .eq('id', card.id)
-        )
-
-        await Promise.all(updates)
-      }
-    } else {
-      // Moving to a different column
-      // Shift cards in the new column at or after the new position down
-      const updates = targetColumnCards
-        .filter((card) => card.position >= newPosition)
-        .map((card) =>
-          supabase
-            .from('cards')
-            .update({ position: card.position + 1 })
-            .eq('id', card.id)
-        )
-
-      await Promise.all(updates)
-
-      // Shift cards in the old column after the old position up
-      const { data: oldColumnCards } = await supabase
-        .from('cards')
-        .select('id, position')
-        .eq('column_id', oldColumnId)
-        .order('position')
-
-      if (oldColumnCards) {
-        const oldUpdates = oldColumnCards
-          .filter((card) => card.position > oldPosition)
-          .map((card) =>
-            supabase
-              .from('cards')
-              .update({ position: card.position - 1 })
-              .eq('id', card.id)
-          )
-
-        await Promise.all(oldUpdates)
-      }
-    }
-
-    // Finally, move the card to its new position
-    const { error } = await supabase
-      .from('cards')
-      .update({ column_id: newColumnId, position: newPosition, updated_at: new Date().toISOString() })
-      .eq('id', cardId)
+    // Use PostgreSQL function for batch update (eliminates N+1 query problem)
+    const { error } = await supabase.rpc('move_card_batch', {
+      p_card_id: cardId,
+      p_new_column_id: newColumnId,
+      p_new_position: newPosition
+    })
 
     if (error) {
-      console.error('Error updating card position:', error)
+      console.error('Error moving card:', error)
       throw error
     }
   },
