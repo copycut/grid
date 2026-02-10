@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Filter, Priority } from '@/types/types'
 import { Button, Form, Modal } from 'antd'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
+import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 import { twMerge } from 'tailwind-merge'
 
@@ -57,6 +58,8 @@ export default function BoardFiltersModal({
     setModalFilters(updatedFilters)
     onSubmit(updatedFilters)
   }
+
+  useEscapeKey(onClose, isOpen)
 
   useKeyboardShortcut(handleSubmit, {
     key: 'Enter',

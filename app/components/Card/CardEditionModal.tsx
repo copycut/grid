@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NewCard } from '@/types/types'
 import { Card as CardType, Column as ColumnType } from '@/lib/supabase/models'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
+import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function CardEditionModal({
@@ -76,18 +77,7 @@ export default function CardEditionModal({
   }
 
   // Close the modal when pressing Escape and no dropdown is open
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isDropdownOpen) {
-        onClose()
-      }
-    }
-
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
-  }, [isOpen, isDropdownOpen, onClose])
+  useEscapeKey(onClose, isOpen, !isDropdownOpen)
 
   useKeyboardShortcut(handleSave, {
     key: 'Enter',

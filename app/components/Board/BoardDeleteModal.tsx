@@ -1,5 +1,6 @@
 import { Button, Modal } from 'antd'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
+import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function BoardDeleteModal({
@@ -15,6 +16,8 @@ export default function BoardDeleteModal({
   onClose: () => void
   onSubmit: (boardId: number) => void
 }) {
+  useEscapeKey(onClose, isOpen)
+
   useKeyboardShortcut(() => boardId && onSubmit(boardId), {
     key: 'Enter',
     modifiers: { cmdOrCtrl: true },

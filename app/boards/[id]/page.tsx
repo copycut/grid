@@ -365,47 +365,47 @@ export default function BoardPage() {
             </DragOverlay>
           </DndContext>
         </main>
-
-        <ColumnEditionModal
-          loading={loading}
-          isOpen={isEditingColumn}
-          column={columnToEdit}
-          onClose={() => setIsEditingColumn(false)}
-          onSave={(title) => handleCreateColumn(title)}
-          onEdit={(column) => handleUpdateColumn(column)}
-          onDeleteColumn={(columnId) => handleDeleteColumn(columnId)}
-        />
-
-        <CardEditionModal
-          loading={loading}
-          isOpen={isAddingCard}
-          columnTargetId={columnTargetId}
-          columns={columns}
-          card={cardToEdit}
-          filterOptions={filterOptions}
-          onClose={() => setIsAddingCard(false)}
-          onEdit={(newCard: CardType, columnId: number) => handleUpdateCard(newCard, columnId)}
-          onSave={(newCard: NewCard, columnId: number) => handleCreateCard(newCard, columnId)}
-          onDelete={(cardId: number) => handleDeleteCard(cardId)}
-        />
-
-        <BoardEditionModal
-          loading={loading}
-          isOpen={isBoardEditing}
-          board={board}
-          onClose={() => setIsBoardEditing(false)}
-          onSubmit={(title: string) => handleUpdateBoard(title)}
-        />
-
-        <BoardFiltersModal
-          isOpen={isFiltering}
-          filters={filters}
-          priorities={filterOptions}
-          onReset={handleResetFilters}
-          onClose={() => setIsFiltering(false)}
-          onSubmit={(filters: Filter) => handleSubmitFilters(filters)}
-        />
       </div>
+
+      <ColumnEditionModal
+        loading={loading}
+        isOpen={isEditingColumn}
+        column={columnToEdit}
+        onClose={() => setIsEditingColumn(false)}
+        onSave={(title) => handleCreateColumn(title)}
+        onEdit={(column) => handleUpdateColumn(column)}
+        onDeleteColumn={(columnId) => handleDeleteColumn(columnId)}
+      />
+
+      <CardEditionModal
+        loading={loading}
+        isOpen={isAddingCard}
+        columnTargetId={columnTargetId}
+        columns={columns}
+        card={cardToEdit}
+        filterOptions={filterOptions}
+        onClose={() => setIsAddingCard(false)}
+        onEdit={(newCard: CardType, columnId: number) => handleUpdateCard(newCard, columnId)}
+        onSave={(newCard: NewCard, columnId: number) => handleCreateCard(newCard, columnId)}
+        onDelete={(cardId: number) => handleDeleteCard(cardId)}
+      />
+
+      <BoardEditionModal
+        loading={loading}
+        isOpen={isBoardEditing}
+        board={board}
+        onClose={() => setIsBoardEditing(false)}
+        onSubmit={(title: string) => handleUpdateBoard(title)}
+      />
+
+      <BoardFiltersModal
+        isOpen={isFiltering}
+        filters={filters}
+        priorities={filterOptions}
+        onReset={handleResetFilters}
+        onClose={() => setIsFiltering(false)}
+        onSubmit={(filters: Filter) => handleSubmitFilters(filters)}
+      />
     </div>
   )
 }

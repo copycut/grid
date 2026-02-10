@@ -2,6 +2,7 @@ import { Board } from '@/lib/supabase/models'
 import { Button, Checkbox, Form, Input, InputRef, Modal } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
+import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function BoardEditionModal({
@@ -44,6 +45,8 @@ export default function BoardEditionModal({
       onSubmit(title, createDefaultColumns)
     })
   }
+
+  useEscapeKey(onClose, isOpen)
 
   useKeyboardShortcut(handleSubmit, {
     key: 'Enter',

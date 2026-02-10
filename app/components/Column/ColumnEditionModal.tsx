@@ -4,6 +4,7 @@ import { Button, Form, Input, Modal, Popconfirm } from 'antd'
 import type { InputRef } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
+import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function ColumnEditionModal({
@@ -53,6 +54,8 @@ export default function ColumnEditionModal({
       onSave(title)
     })
   }
+
+  useEscapeKey(onClose, isOpen)
 
   useKeyboardShortcut(handleSubmit, {
     key: 'Enter',
