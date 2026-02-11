@@ -322,7 +322,7 @@ export default function BoardPage() {
                 id="board"
                 className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 px-2 lg:px-4 space-y-4 lg:space-y-0 min-h-dvh"
               >
-                {loadingBoard && <LoaderPlaceHolder />}
+                {loadingBoard && filteredColumns.length === 0 && <LoaderPlaceHolder />}
 
                 {filteredColumns?.map((column) => (
                   <Column
@@ -349,7 +349,7 @@ export default function BoardPage() {
 
             <DragOverlay>
               {activeCard && (
-                <div style={{ transform: 'rotate(2.5deg) scale(1.05)' }}>
+                <div style={{ transform: 'rotate(2deg)', transition: 'transform 0.3s ease-out' }}>
                   <Card card={activeCard} priorityOptions={filterOptions.priority} />
                 </div>
               )}

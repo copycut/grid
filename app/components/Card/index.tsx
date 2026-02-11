@@ -20,6 +20,13 @@ export default function Card({
     transition,
     opacity: isDragging ? 0.5 : 1
   }
+  const dateOptions = {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  } as const
 
   return (
     <div
@@ -42,8 +49,10 @@ export default function Card({
         </div>
         {card.description && (
           <div className="flex items-start space-x-4 py-2 user-select-none">
-            <AlignLeftOutlined className="opacity-30 mt-1" />
-            <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{card.description}</div>
+            <AlignLeftOutlined className="opacity-50 mt-0.5" />
+            <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+              {new Date(card.updated_at).toLocaleString('en-US', dateOptions)}
+            </div>
           </div>
         )}
       </div>

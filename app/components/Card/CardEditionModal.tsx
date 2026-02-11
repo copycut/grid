@@ -1,11 +1,12 @@
 import { Button, Form, Input, InputRef, Modal, Popconfirm, Select } from 'antd'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { useEffect, useRef, useState } from 'react'
 import { NewCard } from '@/types/types'
 import { Card as CardType, Column as ColumnType } from '@/lib/supabase/models'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
+import MarkdownEditor from '@/app/components/ui/MarkdownEditor'
 
 export default function CardEditionModal({
   loading,
@@ -31,53 +32,56 @@ export default function CardEditionModal({
   onDelete: (cardId: number) => void
 }) {
   const [createCardForm] = Form.useForm()
-  const { TextArea } = Input
-  const [editedCard, setNewCard] = useState<NewCard | CardType>({
+  const titleInputRef = useRef<InputRef>(null)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
+  const cardData = {
     ...card,
     title: card?.title || '',
     description: card?.description || '',
     priority: card?.priority || 'default',
     column_id: columnTargetId || columns[0]?.id || 0
-  })
-  const titleInputRef = useRef<InputRef>(null)
-  // Antd Select captures the Escape keydown event and doesn't trigger the onClose function
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  }
+
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
-      const cardData = {
-        ...card,
-        title: card?.title || '',
-        description: card?.description || '',
-        priority: card?.priority || 'default',
-        column_id: columnTargetId || columns[0]?.id
-      }
       createCardForm.setFieldsValue({
         column_id: cardData.column_id,
         title: cardData.title,
         description: cardData.description,
         priority: cardData.priority
       })
-      // Use setTimeout to ensure the modal is fully rendered before focusing
       setTimeout(() => {
         titleInputRef.current?.focus()
       }, 100)
     } else {
       createCardForm.resetFields()
     }
-  }, [isOpen, card, columnTargetId, columns, createCardForm])
+  }, [isOpen, cardData.column_id, cardData.title, cardData.description, cardData.priority, createCardForm])
 
   const handleSave = () => {
-    createCardForm.validateFields().then(() => {
-      if (!editedCard.title.trim()) return
+    createCardForm.validateFields().then((values) => {
+      const cardToSave = {
+        ...card,
+        ...values
+      }
+
+      if (!values.title.trim()) return
 
       const action = card ? onEdit : onSave
-      action(editedCard as CardType, editedCard.column_id!)
+      action(cardToSave as CardType, values.column_id)
+      setIsEditingDescription(false)
     })
   }
 
-  // Close the modal when pressing Escape and no dropdown is open
-  useEscapeKey(onClose, isOpen, !isDropdownOpen)
+  const handleClose = () => {
+    setIsEditingDescription(false)
+    onClose()
+  }
+
+  useEscapeKey(handleClose, isOpen, !isDropdownOpen)
 
   useKeyboardShortcut(handleSave, {
     key: 'Enter',
@@ -94,9 +98,9 @@ export default function CardEditionModal({
       centered
       okText={card ? 'Save' : 'Add'}
       onOk={handleSave}
-      onCancel={onClose}
+      onCancel={handleClose}
       footer={[
-        <Button key="cancel" onClick={onClose}>
+        <Button key="cancel" onClick={handleClose}>
           Cancel
         </Button>,
         <Button key="submit" type="primary" loading={loading} onClick={handleSave}>
@@ -116,37 +120,43 @@ export default function CardEditionModal({
           <Form.Item label="Column" name="column_id" rules={[{ required: true, message: 'Please select a column' }]}>
             <Select
               options={columns.map((column) => ({ value: column.id, label: column.title }))}
-              value={editedCard.column_id}
-              onChange={(value) => setNewCard({ ...editedCard, column_id: value })}
               onOpenChange={(open) => setIsDropdownOpen(open)}
             />
           </Form.Item>
           <Form.Item label="Priority" name="priority">
-            <Select
-              options={filterOptions.priority}
-              value={editedCard.priority}
-              onChange={(value) => setNewCard({ ...editedCard, priority: value })}
-              onOpenChange={(open) => setIsDropdownOpen(open)}
-            />
+            <Select options={filterOptions.priority} onOpenChange={(open) => setIsDropdownOpen(open)} />
           </Form.Item>
         </div>
 
         <Form.Item label="Title" name="title" rules={[{ required: true, message: 'Please enter a title' }]}>
-          <Input
-            ref={titleInputRef}
-            type="text"
-            placeholder="Enter card title"
-            value={editedCard?.title}
-            onChange={(e) => setNewCard({ ...editedCard, title: e.target.value })}
-          />
+          <Input ref={titleInputRef} type="text" placeholder="Enter card title" />
         </Form.Item>
 
-        <Form.Item label="Description" name="description">
-          <TextArea
-            rows={6}
+        <Form.Item
+          label={
+            <div className="flex items-center justify-between w-200 max-w-full -mr-20">
+              <span>Description</span>
+              {cardData.description && (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={isEditingDescription ? <EyeOutlined /> : <EditOutlined />}
+                  onClick={() => setIsEditingDescription(!isEditingDescription)}
+                >
+                  {isEditingDescription ? 'Preview' : 'Edit'}
+                </Button>
+              )}
+            </div>
+          }
+          name="description"
+        >
+          <MarkdownEditor
             placeholder="Enter card description"
-            value={editedCard?.description}
-            onChange={(e) => setNewCard({ ...editedCard, description: e.target.value })}
+            maxLength={255}
+            value={cardData.description}
+            isEditing={isEditingDescription}
+            setIsEditing={setIsEditingDescription}
+            onChange={(value) => createCardForm.setFieldsValue({ description: value })}
           />
         </Form.Item>
       </Form>
