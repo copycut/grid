@@ -6,6 +6,7 @@ import { Card as CardType, Column as ColumnType } from '@/lib/supabase/models'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import { formatDate } from '@/lib/utils/date'
+import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 import MarkdownEditor from '@/app/components/ui/MarkdownEditor'
 
@@ -36,6 +37,7 @@ export default function CardEditionModal({
   const titleInputRef = useRef<InputRef>(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isEditingDescription, setIsEditingDescription] = useState(false)
+  const { isMobile } = useDeviceDetection()
 
   const cardData = {
     ...card,
@@ -95,7 +97,7 @@ export default function CardEditionModal({
       title={card ? 'Edit Card' : 'New Card'}
       open={isOpen}
       forceRender
-      centered
+      centered={isMobile}
       okText={card ? 'Save' : 'Add'}
       onOk={handleSave}
       onCancel={handleClose}

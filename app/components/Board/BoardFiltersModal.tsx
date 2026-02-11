@@ -4,6 +4,7 @@ import { Button, Form, Modal } from 'antd'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import { cn } from '@/lib/classnames'
+import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function BoardFiltersModal({
@@ -23,6 +24,7 @@ export default function BoardFiltersModal({
 }) {
   const [filterForm] = Form.useForm()
   const [modalFilters, setModalFilters] = useState<Filter>(filters)
+  const { isMobile } = useDeviceDetection()
   const priorityColorsClasses: Record<string, string> = {
     default: 'bg-gray-500',
     low: 'bg-green-500',
@@ -88,7 +90,7 @@ export default function BoardFiltersModal({
       okText="Apply"
       onOk={handleSubmit}
       onCancel={onClose}
-      centered
+      centered={isMobile}
       footer={[
         <Button key="cancel" onClick={onClose}>
           Cancel

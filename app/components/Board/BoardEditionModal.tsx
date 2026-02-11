@@ -3,6 +3,7 @@ import { Button, Checkbox, Form, Input, InputRef, Modal } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
+import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function BoardEditionModal({
@@ -23,6 +24,7 @@ export default function BoardEditionModal({
   const [createDefaultColumns, setCreateDefaultColumns] = useState(true)
   const titleInputRef = useRef<InputRef>(null)
   const isEditMode = !!board
+  const { isMobile } = useDeviceDetection()
 
   useEffect(() => {
     if (isOpen) {
@@ -63,7 +65,7 @@ export default function BoardEditionModal({
       okText={isEditMode ? 'Save' : 'Create'}
       onCancel={onClose}
       forceRender
-      centered
+      centered={isMobile}
       footer={[
         <Button key="cancel" onClick={onClose}>
           Cancel

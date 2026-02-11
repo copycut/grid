@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
 import { ColumnWithCards as ColumnType } from '@/lib/supabase/models'
 import { Button, Tag } from 'antd'
 import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons'
 import { useDroppable } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
 
 export default function Column({
   column,
@@ -17,7 +17,7 @@ export default function Column({
   onCreateCard?: () => void
   onEditColumn?: () => void
 }) {
-  const [isMobile, setIsMobile] = useState(false)
+  const { isMobile } = useDeviceDetection()
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({ id: column.id })
   const { setNodeRef, listeners, attributes, transform, transition, isDragging } = useSortable({
     id: column.id,
@@ -30,13 +30,6 @@ export default function Column({
     transition,
     opacity: isDragging ? 0.5 : 1
   }
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
-    }
-    checkMobile()
-  }, [])
 
   return (
     <div ref={setNodeRef} style={style} className="w-full lg:shrink-0 lg:w-80">

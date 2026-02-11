@@ -1,4 +1,6 @@
+'use client'
 import { Tag } from 'antd'
+import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
 
 export default function ShortcutIndicator({
   children,
@@ -7,21 +9,15 @@ export default function ShortcutIndicator({
   children: React.ReactNode
   color?: string
 }) {
-  const isMobile = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  }
+  const { isMobile, isMac } = useDeviceDetection()
 
-  const isMac = () => {
-    return /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
-  }
-
-  if (isMobile()) {
+  if (isMobile) {
     return null
   }
 
   return (
     <Tag variant="outlined" color={color} className="bg-transparent! opacity-50!">
-      <span className="text-xs">{isMac() ? '⌘' : 'Ctrl'}</span>
+      <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>
       {children}
     </Tag>
   )

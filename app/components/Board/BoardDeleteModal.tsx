@@ -1,6 +1,7 @@
 import { Button, Modal } from 'antd'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
+import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function BoardDeleteModal({
@@ -16,6 +17,8 @@ export default function BoardDeleteModal({
   onClose: () => void
   onSubmit: (boardId: number) => void
 }) {
+  const { isMobile } = useDeviceDetection()
+
   useEscapeKey(onClose, isOpen)
 
   useKeyboardShortcut(() => boardId && onSubmit(boardId), {
@@ -31,6 +34,7 @@ export default function BoardDeleteModal({
       open={isOpen}
       onOk={() => boardId && onSubmit(boardId)}
       onCancel={onClose}
+      centered={isMobile}
       footer={[
         <Button key="cancel" onClick={onClose}>
           Cancel

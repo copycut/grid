@@ -6,6 +6,7 @@ import { DeleteOutlined } from '@ant-design/icons'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import { formatDate } from '@/lib/utils/date'
+import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function ColumnEditionModal({
@@ -28,6 +29,7 @@ export default function ColumnEditionModal({
   const [columnForm] = Form.useForm()
   const [title, setTitle] = useState(column?.title || '')
   const titleInputRef = useRef<InputRef>(null)
+  const { isMobile } = useDeviceDetection()
 
   useEffect(() => {
     if (isOpen) {
@@ -73,7 +75,7 @@ export default function ColumnEditionModal({
       okText={column ? 'Save' : 'Add'}
       onCancel={onClose}
       forceRender
-      centered
+      centered={isMobile}
       footer={[
         <Button key="cancel" onClick={onClose}>
           Cancel
@@ -91,8 +93,10 @@ export default function ColumnEditionModal({
       </Form>
 
       {column && 'created_at' in column && (
-        <p className="flex items-center justify-between space-x-2 text-sm text-gray-500 pb-2">
-          <span>Created at {formatDate(column.created_at)}</span>
+        <p className="flex items-center justify-between space-x-2 text-sm text-gray-500 dark:text-gray-400 pb-2">
+          <span>
+            <span className="font-semibold">Created:</span> {formatDate(column.created_at)}
+          </span>
 
           <Popconfirm
             title="Delete the column"
