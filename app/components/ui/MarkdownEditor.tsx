@@ -18,14 +18,18 @@ export default function MarkdownEditor({
   isEditing: boolean
   setIsEditing: (value: boolean) => void
 }) {
-  if (!isEditing && value) {
+  if (!isEditing) {
     return (
       <div
         className="rounded-xl overflow-hidden border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3"
         onClick={() => setIsEditing(true)}
       >
         <div className="markdown-preview-isolated">
-          <MDEditor.Markdown source={value} rehypePlugins={[rehypeSanitize]} style={{ background: 'transparent' }} />
+          <MDEditor.Markdown
+            source={value || 'Click to add a description...'}
+            rehypePlugins={[rehypeSanitize]}
+            style={{ background: 'transparent', minHeight: '100px' }}
+          />
         </div>
       </div>
     )
@@ -36,6 +40,7 @@ export default function MarkdownEditor({
       className="border border-neutral-300 dark:border-neutral-700 rounded-xl"
       value={value}
       onChange={onChange}
+      autoFocus
       textareaProps={{
         placeholder,
         maxLength

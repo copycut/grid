@@ -136,16 +136,14 @@ export default function CardEditionModal({
           label={
             <div className="flex items-center justify-between w-200 max-w-full -mr-20">
               <span>Description</span>
-              {cardData.description && (
-                <Button
-                  type="text"
-                  size="small"
-                  icon={isEditingDescription ? <EyeOutlined /> : <EditOutlined />}
-                  onClick={() => setIsEditingDescription(!isEditingDescription)}
-                >
-                  {isEditingDescription ? 'Preview' : 'Edit'}
-                </Button>
-              )}
+              <Button
+                type="text"
+                size="small"
+                icon={isEditingDescription ? <EyeOutlined /> : <EditOutlined />}
+                onClick={() => setIsEditingDescription(!isEditingDescription)}
+              >
+                {isEditingDescription ? 'Preview' : 'Edit'}
+              </Button>
             </div>
           }
           name="description"

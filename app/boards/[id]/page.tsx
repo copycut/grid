@@ -355,7 +355,7 @@ export default function BoardPage() {
               )}
               {activeColumn && (
                 <Column column={activeColumn}>
-                  <div className="p-4 space-y-2">
+                  <div className="space-y-3">
                     {activeColumn.cards.map((card) => (
                       <Card key={card.id} card={card} priorityOptions={filterOptions.priority} />
                     ))}
