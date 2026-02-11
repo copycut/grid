@@ -82,7 +82,7 @@ export default function DashboardGridItem({
         }
         hoverable
       >
-        <div className="flex flex-col space-x-2 text-sm text-gray-500">
+        <div className="flex flex-col space-x-2 text-sm text-gray-500 dark:text-gray-400">
           <div className="flex flex-nowrap items-center space-x-1">
             <span className="font-semibold">Created at </span>
             <span>{new Date(board.created_at).toLocaleDateString()}</span>

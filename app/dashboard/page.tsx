@@ -140,7 +140,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-300 pb-2 m-0">
             Welcome back, {user?.firstName ?? user?.emailAddresses[0]?.emailAddress}! 👋
           </h1>
-          <p className="text-gray-600 dark:text-gray-500">Here what&rsquo;s happening in your Grid today</p>
+          <p className="text-gray-600 dark:text-gray-400">Here what&rsquo;s happening in your Grid today</p>
         </div>
 
         <DashboardTopCards boards={optimisticBoards} />
@@ -156,7 +156,7 @@ export default function DashboardPage() {
           />
 
           {filteredBoards.length < 1 && (
-            <div className="text-center text-gray-500">
+            <div className="text-center text-gray-500 dark:text-gray-400">
               {searchQuery ? 'No boards match your search' : 'No Boards Found'}
             </div>
           )}

@@ -22,7 +22,6 @@ function RenderLoading() {
 export default function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const { session, isLoaded: sessionLoaded } = useSession()
 
-  // Create supabase client only when we have a session
   const supabase = useMemo(() => {
     if (!sessionLoaded || !session) return null
 
@@ -33,7 +32,7 @@ export default function SupabaseProvider({ children }: { children: React.ReactNo
         accessToken: async () => session.getToken() ?? null
       }
     )
-  }, [sessionLoaded])
+  }, [session, sessionLoaded])
 
   const value = useMemo(() => ({ supabase, isLoaded: sessionLoaded }), [supabase, sessionLoaded])
 

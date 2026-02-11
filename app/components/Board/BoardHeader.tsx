@@ -23,7 +23,7 @@ export default function BoardHeader({
     <div className="flex items-center justify-between gap-2 pb-6 px-4">
       <div className="flex flex-wrap items-center gap-4 sm:gap-6 pb-2">
         <div className="text-sm text-gray-600 dark:text-white/50">
-          <span className="font-medium">Total cards: </span>
+          <h2 className="inline font-medium">Total cards: </h2>
           {filterCount > 0 && <span>{filteredCardsCount}/</span>}
           <span>{totalCardsCount}</span>
         </div>

@@ -32,7 +32,7 @@ export default function DashboardListItem({
               <div className="group-hover:text-primary-500 transition-colors font-bold text-xl">{board.title}</div>
             </div>
 
-            <div className="text-sm text-gray-500 pl-2">
+            <div className="pl-2 text-sm text-gray-500 dark:text-gray-400">
               <span className="font-semibold">Created at </span>
               <span>{new Date(board.created_at).toLocaleDateString()}</span>
               <span className="font-semibold ml-4">Updated at </span>

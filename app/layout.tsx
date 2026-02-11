@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { App } from 'antd'
 import ThemeProvider from '@/app/components/providers/ThemeProvider'
+import AxeProvider from '@/app/components/providers/AxeProvider'
 import './globals.css'
 
 const geistSans = Geist({
@@ -31,9 +32,11 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <ThemeProvider>
-            <App>{children}</App>
-          </ThemeProvider>
+          <AxeProvider>
+            <ThemeProvider>
+              <App>{children}</App>
+            </ThemeProvider>
+          </AxeProvider>
           <SpeedInsights />
         </body>
       </html>

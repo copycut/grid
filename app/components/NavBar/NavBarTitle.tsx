@@ -29,8 +29,8 @@ export default function NavBarTitle({
   ) : (
     <div className="flex flex-1 min-w-0 items-center text-primary">
       <Link href="/dashboard" className="flex items-center shrink-0 text-sm gap-2 pr-4 group">
-        <ArrowLeftOutlined className="text-lg text-primary group-hover:text-primary-900! transition-colors" />
-        <span className="hidden sm:inline font-medium text-primary group-hover:text-primary-900! transition-colors">
+        <ArrowLeftOutlined className="text-lg text-primary group-hover:text-primary-900! dark:group-hover:text-primary-400! transition-colors" />
+        <span className="hidden sm:inline font-medium text-primary group-hover:text-primary-900! dark:group-hover:text-primary-400! transition-colors">
           Back to dashboard
         </span>
       </Link>
@@ -38,7 +38,7 @@ export default function NavBarTitle({
       <ProjectFilled className="text-2xl shrink-0" />
 
       <div className="flex items-center min-w-0 gap-2 text-2xl font-bold pl-2 text-gray-700 dark:text-white">
-        <div className="truncate">{boardTitle ?? 'Board Name'}</div>
+        <h1 className="truncate">{boardTitle ?? 'Board Name'}</h1>
 
         <Button type="text" shape="circle" onClick={() => onToggleFavorite?.(boardId || 0)} title="Toggle favorite">
           {isFavorite ? <StarFilled className="text-primary!" /> : <StarOutlined className="text-primary!" />}

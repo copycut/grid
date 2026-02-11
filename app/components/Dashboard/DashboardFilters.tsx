@@ -22,7 +22,7 @@ export default function DashboardFilters({
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-300 m-0" data-heading-tag="H2">
           Your Boards
         </h2>
-        <p className="text-gray-600 dark:text-gray-500">Manage your projects and tasks with ease</p>
+        <p className="text-gray-600 dark:text-gray-400">Manage your projects and tasks with ease</p>
       </div>
 
       <div className="flex items-center space-x-2 pb-4">
