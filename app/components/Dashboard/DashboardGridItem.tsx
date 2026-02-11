@@ -4,6 +4,7 @@ import { Button, Card, Tag, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
 import { Board } from '@/lib/supabase/models'
 import { EllipsisOutlined, EditOutlined, DeleteOutlined, StarOutlined, StarFilled } from '@ant-design/icons'
+import { formatDate } from '@/lib/utils/date'
 
 export default function DashboardGridItem({
   board,
@@ -83,13 +84,13 @@ export default function DashboardGridItem({
         hoverable
       >
         <div className="flex flex-col space-x-2 text-sm text-gray-500 dark:text-gray-400">
-          <div className="flex flex-nowrap items-center space-x-1">
-            <span className="font-semibold">Created at </span>
-            <span>{new Date(board.created_at).toLocaleDateString()}</span>
+          <div className="flex flex-nowrap items-center gap-2">
+            <span className="font-semibold">Created:</span>
+            <span>{formatDate(board.created_at)}</span>
           </div>
-          <div className="flex flex-nowrap items-center space-x-1">
-            <span className="font-semibold">Updated at </span>
-            <span>{new Date(board.updated_at).toLocaleDateString()}</span>
+          <div className="flex flex-nowrap items-center gap-2">
+            <span className="font-semibold">Updated:</span>
+            <span>{formatDate(board.updated_at)}</span>
           </div>
         </div>
       </Card>

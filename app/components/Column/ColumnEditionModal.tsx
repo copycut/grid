@@ -5,6 +5,7 @@ import type { InputRef } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
+import { formatDate } from '@/lib/utils/date'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function ColumnEditionModal({
@@ -91,7 +92,7 @@ export default function ColumnEditionModal({
 
       {column && 'created_at' in column && (
         <p className="flex items-center justify-between space-x-2 text-sm text-gray-500 pb-2">
-          <span>Created at {new Date(column.created_at).toLocaleDateString()}</span>
+          <span>Created at {formatDate(column.created_at)}</span>
 
           <Popconfirm
             title="Delete the column"

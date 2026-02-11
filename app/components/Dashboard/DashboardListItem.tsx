@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Button, Card } from 'antd'
 import { Board } from '@/lib/supabase/models'
 import { RightOutlined, StarOutlined, StarFilled } from '@ant-design/icons'
+import { formatDate } from '@/lib/utils/date'
 
 export default function DashboardListItem({
   board,
@@ -33,10 +34,10 @@ export default function DashboardListItem({
             </div>
 
             <div className="pl-2 text-sm text-gray-500 dark:text-gray-400">
-              <span className="font-semibold">Created at </span>
-              <span>{new Date(board.created_at).toLocaleDateString()}</span>
-              <span className="font-semibold ml-4">Updated at </span>
-              <span>{new Date(board.updated_at).toLocaleDateString()}</span>
+              <span className="font-semibold">Created: </span>
+              <span>{formatDate(board.created_at)}</span>
+              <span className="font-semibold ml-4">Updated: </span>
+              <span>{formatDate(board.updated_at)}</span>
             </div>
           </div>
           <RightOutlined className="text-xl text-gray-300! dark:text-gray-600! group-hover:text-primary-500! transition-colors" />

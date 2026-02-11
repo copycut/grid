@@ -3,8 +3,8 @@ import { Filter, Priority } from '@/types/types'
 import { Button, Form, Modal } from 'antd'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
+import { cn } from '@/lib/classnames'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
-import { twMerge } from 'tailwind-merge'
 
 export default function BoardFiltersModal({
   isOpen,
@@ -23,6 +23,12 @@ export default function BoardFiltersModal({
 }) {
   const [filterForm] = Form.useForm()
   const [modalFilters, setModalFilters] = useState<Filter>(filters)
+  const priorityColorsClasses: Record<string, string> = {
+    default: 'bg-gray-500',
+    low: 'bg-green-500',
+    medium: 'bg-orange-500',
+    high: 'bg-red-500'
+  }
 
   const handleResetForm = () => {
     filterForm.resetFields()
@@ -106,7 +112,7 @@ export default function BoardFiltersModal({
                 type={isPrioritySelected(priorityItem.value) ? 'primary' : 'default'}
                 onClick={() => togglePriority(priorityItem.value as Priority)}
               >
-                <span className={twMerge(`h-3 w-3 rounded-full bg-${priorityItem.color || 'gray'}-500`)} />
+                <span className={cn(`${priorityColorsClasses[priorityItem.value]} h-3 w-3 rounded-full`)} />
                 {priorityItem.label}
               </Button>
             ))}

@@ -35,7 +35,7 @@ export default function DashboardTopCards({ boards }: { boards: Board[] }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 sm:gap-6 pb-6 sm:pb-8">
       {cardContent.map((card) => (
         <div key={card.title} className="sm:hidden flex items-center gap-4">
-          <div className={cn(card.colorClasses, 'rounded-lg p-2 flex items-center justify-center')}>
+          <div className={cn(card.colorClasses, 'rounded-lg p-2 flex items-center justify-center shadow')}>
             <card.icon className=" text-xl" />
           </div>
           <p className="text-nm font-bold">

@@ -5,6 +5,7 @@ import { NewCard } from '@/types/types'
 import { Card as CardType, Column as ColumnType } from '@/lib/supabase/models'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
+import { formatDate } from '@/lib/utils/date'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 import MarkdownEditor from '@/app/components/ui/MarkdownEditor'
 
@@ -34,6 +35,7 @@ export default function CardEditionModal({
   const [createCardForm] = Form.useForm()
   const titleInputRef = useRef<InputRef>(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
 
   const cardData = {
     ...card,
@@ -42,8 +44,6 @@ export default function CardEditionModal({
     priority: card?.priority || 'default',
     column_id: columnTargetId || columns[0]?.id || 0
   }
-
-  const [isEditingDescription, setIsEditingDescription] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -68,10 +68,10 @@ export default function CardEditionModal({
         ...values
       }
 
-      if (!values.title.trim()) return
+      if (!cardToSave.title.trim()) return
 
       const action = card ? onEdit : onSave
-      action(cardToSave as CardType, values.column_id)
+      action(cardToSave as CardType, cardToSave.column_id)
       setIsEditingDescription(false)
     })
   }
@@ -156,40 +156,38 @@ export default function CardEditionModal({
             value={cardData.description}
             isEditing={isEditingDescription}
             setIsEditing={setIsEditingDescription}
-            onChange={(value) => createCardForm.setFieldsValue({ description: value })}
+            onChange={(description) => createCardForm.setFieldsValue({ description })}
           />
         </Form.Item>
       </Form>
 
-      <div className="flex items-center justify-between space-x-2 text-gray-500 pb-2">
-        {card && 'created_at' in card && 'updated_at' in card && (
-          <p className="flex items-center justify-between space-x-2">
-            <span>
-              <span className="font-semibold">Created at </span>
-              {new Date(card.created_at).toLocaleDateString()}
-            </span>
-            <span>
-              <span className="font-semibold">Updated at </span>
-              {new Date(card.updated_at).toLocaleDateString()}
-            </span>
-          </p>
+      <div className="flex items-center justify-between gap-2 text-gray-500 pb-2">
+        {card && 'updated_at' in card && (
+          <div className="flex flex-col">
+            <p className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+              <span className="font-semibold">Updated:</span>
+              <span>{formatDate(card.updated_at)}</span>
+            </p>
+            <p className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+              <span className="font-semibold">Created:</span>
+              <span>{formatDate(card.created_at)}</span>
+            </p>
+          </div>
         )}
         {card && 'id' in card && (
-          <p className="flex items-center justify-between">
-            <Popconfirm
-              title="Delete the card"
-              description="Are you sure to delete this card? This action is irreversible."
-              onConfirm={() => onDelete(card.id)}
-              okText="Yes"
-              cancelText="No"
-              icon={<DeleteOutlined />}
-            >
-              <Button type="text" danger>
-                <DeleteOutlined />
-                Delete Card
-              </Button>
-            </Popconfirm>
-          </p>
+          <Popconfirm
+            title="Delete the card"
+            description="Are you sure to delete this card? This action is irreversible."
+            onConfirm={() => onDelete(card.id)}
+            okText="Yes"
+            cancelText="No"
+            icon={<DeleteOutlined />}
+          >
+            <Button type="text" danger>
+              <DeleteOutlined />
+              Delete Card
+            </Button>
+          </Popconfirm>
         )}
       </div>
     </Modal>
