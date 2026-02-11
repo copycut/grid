@@ -38,10 +38,7 @@ export default function MarkdownEditor({
       onChange={onChange}
       textareaProps={{
         placeholder,
-        maxLength,
-        style: {
-          fontFamily: 'var(--font-geist-sans)'
-        }
+        maxLength
       }}
       preview="edit"
       previewOptions={{
