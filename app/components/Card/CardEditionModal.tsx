@@ -1,6 +1,6 @@
 import { Button, Form, Input, InputRef, Modal, Popconfirm, Select } from 'antd'
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { NewCard } from '@/types/types'
 import { Card as CardType, Column as ColumnType } from '@/lib/supabase/models'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
@@ -47,7 +47,7 @@ export default function CardEditionModal({
     column_id: columnTargetId || columns[0]?.id || 0
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen) {
       createCardForm.setFieldsValue({
         column_id: cardData.column_id,
@@ -55,13 +55,9 @@ export default function CardEditionModal({
         description: cardData.description,
         priority: cardData.priority
       })
-      setTimeout(() => {
-        titleInputRef.current?.focus()
-      }, 100)
-    } else {
-      createCardForm.resetFields()
+      setTimeout(() => titleInputRef.current?.focus(), 0)
     }
-  }, [isOpen, cardData.column_id, cardData.title, cardData.description, cardData.priority, createCardForm])
+  }, [isOpen, createCardForm, cardData.column_id, cardData.title, cardData.description, cardData.priority])
 
   const handleSave = () => {
     createCardForm.validateFields().then((values) => {
@@ -80,6 +76,7 @@ export default function CardEditionModal({
 
   const handleClose = () => {
     setIsEditingDescription(false)
+    createCardForm.resetFields()
     onClose()
   }
 
@@ -117,7 +114,16 @@ export default function CardEditionModal({
         }
       }}
     >
-      <Form form={createCardForm} layout="vertical">
+      <Form
+        form={createCardForm}
+        layout="vertical"
+        initialValues={{
+          column_id: cardData.column_id,
+          title: cardData.title,
+          description: cardData.description,
+          priority: cardData.priority
+        }}
+      >
         <div className="grid grid-cols-2 gap-4">
           <Form.Item label="Column" name="column_id" rules={[{ required: true, message: 'Please select a column' }]}>
             <Select
@@ -131,7 +137,7 @@ export default function CardEditionModal({
         </div>
 
         <Form.Item label="Title" name="title" rules={[{ required: true, message: 'Please enter a title' }]}>
-          <Input ref={titleInputRef} type="text" placeholder="Enter card title" />
+          <Input ref={titleInputRef} type="text" placeholder="Enter card title" autoFocus />
         </Form.Item>
 
         <Form.Item

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Column, ColumnWithCards } from '@/lib/supabase/models'
 import { Button, Form, Input, Modal, Popconfirm } from 'antd'
 import type { InputRef } from 'antd'
@@ -31,19 +31,12 @@ export default function ColumnEditionModal({
   const titleInputRef = useRef<InputRef>(null)
   const { isMobile } = useDeviceDetection()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
-        titleInputRef.current?.focus()
-      }, 100)
-
-      if (column) {
-        columnForm.setFieldsValue({ title: column.title })
-      } else {
-        columnForm.resetFields()
-      }
+      columnForm.setFieldsValue({ title: column?.title || '' })
+      setTimeout(() => titleInputRef.current?.focus(), 0)
     }
-  }, [isOpen, column, columnForm])
+  }, [isOpen, column?.title, columnForm])
 
   const handleSubmit = () => {
     columnForm.validateFields().then(() => {
@@ -73,11 +66,20 @@ export default function ColumnEditionModal({
       open={isOpen}
       onOk={handleSubmit}
       okText={column ? 'Save' : 'Add'}
-      onCancel={onClose}
+      onCancel={() => {
+        columnForm.resetFields()
+        onClose()
+      }}
       forceRender
       centered={isMobile}
       footer={[
-        <Button key="cancel" onClick={onClose}>
+        <Button
+          key="cancel"
+          onClick={() => {
+            columnForm.resetFields()
+            onClose()
+          }}
+        >
           Cancel
         </Button>,
         <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
@@ -86,9 +88,9 @@ export default function ColumnEditionModal({
         </Button>
       ]}
     >
-      <Form form={columnForm} onFinish={handleSubmit}>
+      <Form form={columnForm} onFinish={handleSubmit} initialValues={{ title: column?.title || '' }}>
         <Form.Item label="Column title" name="title" rules={[{ required: true, message: 'Please enter a title' }]}>
-          <Input ref={titleInputRef} type="text" onChange={(e) => setTitle(e.target.value)} />
+          <Input ref={titleInputRef} type="text" onChange={(e) => setTitle(e.target.value)} autoFocus />
         </Form.Item>
       </Form>
 

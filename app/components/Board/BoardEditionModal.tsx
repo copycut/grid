@@ -1,6 +1,6 @@
 import { Board } from '@/lib/supabase/models'
 import { Button, Checkbox, Form, Input, InputRef, Modal } from 'antd'
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
@@ -26,11 +26,9 @@ export default function BoardEditionModal({
   const isEditMode = !!board
   const { isMobile } = useDeviceDetection()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
-        titleInputRef.current?.focus()
-      }, 100)
+      setTimeout(() => titleInputRef.current?.focus(), 0)
 
       if (board) {
         form.setFieldsValue({ title: board.title })
