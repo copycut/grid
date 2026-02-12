@@ -38,7 +38,9 @@ export default function DashboardPage() {
     })
 
   useEffect(() => {
-    loadBoards()
+    const controller = new AbortController()
+    loadBoards(controller.signal)
+    return () => controller.abort()
   }, [loadBoards])
 
   const handleBoardToDeleteModal = (boardID: number) => {

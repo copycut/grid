@@ -12,7 +12,7 @@ export const boardService = {
     return data
   },
 
-  async getBoards(supabase: SupabaseClient, userId: string): Promise<Board[]> {
+  async getBoards(supabase: SupabaseClient, userId: string, signal?: AbortSignal): Promise<Board[]> {
     const rateLimitResult = await boardLoadLimiter.limit(userId)
 
     if (!rateLimitResult.success) {
@@ -25,11 +25,18 @@ export const boardService = {
       )
     }
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('boards')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
+      .limit(100)
+
+    if (signal) {
+      query = query.abortSignal(signal)
+    }
+
+    const { data, error } = await query
 
     if (error) throw error
 

@@ -12,21 +12,24 @@ export function useBoards() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const loadBoards = useCallback(async () => {
-    if (!user?.id) throw new Error('User not authenticated')
+  const loadBoards = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!user?.id) throw new Error('User not authenticated')
 
-    try {
-      setLoading(true)
-      const boards = await boardService.getBoards(supabase!, user.id)
-      setBoards(boards)
-      return boards
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to load boards')
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }, [user?.id, supabase])
+      try {
+        setLoading(true)
+        const boards = await boardService.getBoards(supabase!, user.id, signal)
+        setBoards(boards)
+        return boards
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Failed to load boards')
+        throw error
+      } finally {
+        setLoading(false)
+      }
+    },
+    [user?.id, supabase]
+  )
 
   const createBoard = useCallback(
     async (boardData: { title: string; createDefaultColumns?: boolean }) => {
