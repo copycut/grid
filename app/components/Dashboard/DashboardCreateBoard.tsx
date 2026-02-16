@@ -13,7 +13,7 @@ export default function DashboardCreateBoard({
       onClick={handleCreateBoard}
     >
       <PlusOutlined className="text-2xl text-gray-500! group-hover:text-primary-500!" />
-      <p className="text-gray-600 group-hover:text-primary-500">Create Board</p>
+      <p className="text-gray-600 dark:text-gray-400 group-hover:text-primary-500">Create Board</p>
     </button>
   )
 }

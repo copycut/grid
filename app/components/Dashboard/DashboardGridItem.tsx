@@ -62,7 +62,7 @@ export default function DashboardGridItem({
         title={
           <div className="flex items-center space-x-2 group-hover:text-primary-500 transition-colors truncate">
             <span>{board.title}</span>
-            <Tag className={`text-primary ${!isNewBoard && 'hidden'}`}>New</Tag>
+            <Tag className={`text-primary-400! ${!isNewBoard && 'hidden'}`}>New</Tag>
           </div>
         }
         extra={

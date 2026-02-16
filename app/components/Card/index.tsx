@@ -30,6 +30,14 @@ export default function Card({
       className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-300 dark:border-neutral-700 cursor-pointer hover:shadow-lg transition-shadow"
       style={styles}
       onClick={() => onEditCard?.(card)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onEditCard?.(card)
+        }
+      }}
     >
       <div className="py-2 px-3">
         <div className="flex items-center justify-between space-x-2 min-w-0">

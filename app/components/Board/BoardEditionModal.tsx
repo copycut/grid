@@ -7,13 +7,11 @@ import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function BoardEditionModal({
-  loading,
   isOpen,
   onClose,
   board,
   onSubmit
 }: {
-  loading: boolean
   isOpen: boolean
   board: Board | null
   onClose: () => void
@@ -68,7 +66,7 @@ export default function BoardEditionModal({
         <Button key="cancel" onClick={onClose}>
           Cancel
         </Button>,
-        <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
+        <Button key="submit" type="primary" onClick={handleSubmit}>
           <ShortcutIndicator>⏎</ShortcutIndicator>
           <span>{isEditMode ? 'Save' : 'Create'}</span>
         </Button>

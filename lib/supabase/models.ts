@@ -29,3 +29,6 @@ export interface Card {
 }
 
 export type ColumnWithCards = Column & { cards: Card[] }
+
+export type OptimisticCard = Card & { isOptimistic?: boolean }
+export type OptimisticColumn = ColumnWithCards & { isOptimistic?: boolean; cards: OptimisticCard[] }

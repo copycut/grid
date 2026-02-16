@@ -5,13 +5,11 @@ import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
 
 export default function BoardDeleteModal({
-  loading,
   isOpen,
   onClose,
   boardId,
   onSubmit
 }: {
-  loading: boolean
   isOpen: boolean
   boardId: number | null
   onClose: () => void
@@ -39,7 +37,7 @@ export default function BoardDeleteModal({
         <Button key="cancel" onClick={onClose}>
           Cancel
         </Button>,
-        <Button key="submit" danger loading={loading} onClick={() => boardId && onSubmit(boardId)}>
+        <Button key="submit" danger onClick={() => boardId && onSubmit(boardId)}>
           <ShortcutIndicator color="red">⏎</ShortcutIndicator>
           Delete
         </Button>

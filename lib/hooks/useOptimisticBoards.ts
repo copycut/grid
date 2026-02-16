@@ -7,9 +7,10 @@ export function useOptimisticBoards(boards: Board[]) {
     (
       currentBoards: Board[],
       action: {
-        type: 'create' | 'delete'
+        type: 'create' | 'delete' | 'update'
         board?: Board
         boardId?: number
+        updates?: Partial<Board>
       }
     ): Board[] => {
       if (action.type === 'create' && action.board) {
@@ -18,6 +19,10 @@ export function useOptimisticBoards(boards: Board[]) {
 
       if (action.type === 'delete' && action.boardId) {
         return currentBoards.filter((board) => board.id !== action.boardId)
+      }
+
+      if (action.type === 'update' && action.boardId && action.updates) {
+        return currentBoards.map((board) => (board.id === action.boardId ? { ...board, ...action.updates } : board))
       }
 
       return currentBoards

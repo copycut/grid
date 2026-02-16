@@ -37,13 +37,13 @@ export default function Column({
         className={`${isOver ? 'ring-2 ring-primary-500' : ''} bg-white dark:bg-black rounded-2xl shadow-sm border border-gray-300 dark:border-gray-700 transition-all`}
       >
         {/* Column header - draggable */}
-        <div
-          className="p-3 sm:p-4 border-b border-b-gray-300 dark:border-b-neutral-700 cursor-grab active:cursor-grabbing"
-          {...listeners}
-          {...attributes}
-        >
+        <div className="p-3 sm:p-4 border-b border-b-gray-300 dark:border-b-neutral-700">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 min-w-0">
+            <div
+              className="flex items-center space-x-2 min-w-0 flex-1 cursor-grab active:cursor-grabbing"
+              {...listeners}
+              {...attributes}
+            >
               <h3 className="font-bold truncated user-select-none">{column.title}</h3>
               <Tag className="user-select-none">{column.cards.length}</Tag>
             </div>

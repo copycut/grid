@@ -5,14 +5,12 @@ export default function DashboardFilters({
   viewMode,
   setViewMode,
   handleCreateBoard,
-  loading,
   searchQuery,
   onSearch
 }: {
   viewMode: 'grid' | 'list'
   setViewMode: (viewMode: 'grid' | 'list') => void
   handleCreateBoard: () => void
-  loading: boolean
   searchQuery: string
   onSearch: (query: string) => void
 }) {
@@ -56,7 +54,7 @@ export default function DashboardFilters({
             <BorderVerticleOutlined />
           </Button>
         </div>
-        <Button loading={loading} type="primary" onClick={handleCreateBoard}>
+        <Button type="primary" onClick={handleCreateBoard}>
           <PlusOutlined />
           Create Board
         </Button>
