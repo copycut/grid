@@ -9,11 +9,13 @@ import { formatDate } from '@/lib/utils/date'
 export default function Card({
   card,
   priorityOptions,
-  onEditCard
+  onEditCard,
+  isNewlyCreated = false
 }: {
   card: CardType
   priorityOptions: { value: string; label: string; color: string }[]
   onEditCard?: (card: NewCard) => void
+  isNewlyCreated?: boolean
 }) {
   const { setNodeRef, listeners, attributes, transform, transition, isDragging } = useSortable({ id: card.id })
   const styles = {
@@ -27,7 +29,11 @@ export default function Card({
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-300 dark:border-neutral-700 cursor-pointer hover:shadow-lg transition-shadow"
+      className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border cursor-pointer hover:shadow-lg transition-all duration-500 ${
+        isNewlyCreated
+          ? 'border-yellow-400 shadow-yellow-200 dark:shadow-yellow-900/50 shadow-lg'
+          : 'border-gray-300 dark:border-neutral-700'
+      }`}
       style={styles}
       onClick={() => onEditCard?.(card)}
       role="button"

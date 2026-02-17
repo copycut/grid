@@ -6,17 +6,17 @@ import { useUser } from '@clerk/clerk-react'
 import { useOptimisticBoards } from '@/lib/hooks/useOptimisticBoards'
 import { useNotification } from '@/lib/utils/notifications'
 import { Board } from '@/lib/supabase/models'
+import {
+  createBoard as createBoardAction,
+  updateBoard as updateBoardAction,
+  deleteBoard as deleteBoardAction
+} from '@/lib/actions/board.actions'
 import NavBar from '@/app/components/NavBar'
 import DashboardTopCards from '@/app/components/Dashboard/DashboardTopCards'
 import DashboardFilters from '@/app/components/Dashboard/DashboardFilters'
 import DashboardCreateBoard from '@/app/components/Dashboard/DashboardCreateBoard'
 import DashboardGridItem from '@/app/components/Dashboard/DashboardGridItem'
 import DashboardListItem from '@/app/components/Dashboard/DashboardListItem'
-import {
-  createBoard as createBoardAction,
-  updateBoard as updateBoardAction,
-  deleteBoard as deleteBoardAction
-} from '@/lib/actions/board.actions'
 
 const BoardDeleteModal = dynamic(() => import('@/app/components/Board/BoardDeleteModal'), { ssr: false })
 const BoardEditionModal = dynamic(() => import('@/app/components/Board/BoardEditionModal'), { ssr: false })

@@ -13,8 +13,6 @@ import {
 } from '@/lib/supabase/models'
 import { useOptimisticColumns } from '@/lib/hooks/useOptimisticColumns'
 import { useNotification } from '@/lib/utils/notifications'
-import NavBar from '@/app/components/NavBar'
-import BoardHeader from '@/app/components/Board/BoardHeader'
 import { updateBoard as updateBoardAction } from '@/lib/actions/board.actions'
 import {
   createColumn as createColumnAction,
@@ -26,6 +24,8 @@ import {
   updateCard as updateCardAction,
   deleteCard as deleteCardAction
 } from '@/lib/actions/card.actions'
+import NavBar from '@/app/components/NavBar'
+import BoardHeader from '@/app/components/Board/BoardHeader'
 
 const BoardContent = dynamic(() => import('./BoardContent'), { ssr: false })
 const BoardEditionModal = dynamic(() => import('@/app/components/Board/BoardEditionModal'), { ssr: false })
@@ -50,6 +50,7 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
   const [columnTargetId, setColumnTargetId] = useState<number | null>(null)
   const [isEditingColumn, setIsEditingColumn] = useState(false)
   const [columnToEdit, setColumnToEdit] = useState<ColumnType | null>(null)
+  const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<number | null>(null)
   const { optimisticColumns, updateOptimisticColumns } = useOptimisticColumns(columns)
   const { notifySuccess, notifyError } = useNotification()
 
@@ -283,6 +284,9 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
         })
       )
 
+      setNewlyCreatedCardId(createdCard.id)
+      setTimeout(() => setNewlyCreatedCardId(null), 2000)
+
       notifySuccess('Card created')
     } catch (error) {
       notifyError('Failed to create card', 'Please try again.', error)
@@ -385,6 +389,7 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
           />
 
           <BoardContent
+            newlyCreatedCardId={newlyCreatedCardId}
             filteredColumns={filteredColumns}
             filterOptions={filterOptions}
             boardId={boardId}

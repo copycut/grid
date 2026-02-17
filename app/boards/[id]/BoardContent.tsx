@@ -27,6 +27,7 @@ interface BoardContentProps {
   onEditCard: (card: NewCard | CardType | null, columnId: number | null) => void
   onEditColumn: (column: ColumnWithCards | null) => void
   onAddColumn: () => void
+  newlyCreatedCardId: number | null
 }
 
 export default function BoardContent({
@@ -36,7 +37,8 @@ export default function BoardContent({
   setColumns,
   onEditCard,
   onEditColumn,
-  onAddColumn
+  onAddColumn,
+  newlyCreatedCardId
 }: BoardContentProps) {
   const sensors = useSensors(
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
@@ -78,6 +80,7 @@ export default function BoardContent({
                     card={card}
                     priorityOptions={filterOptions.priority}
                     onEditCard={(card: NewCard | CardType) => onEditCard(card, column.id)}
+                    isNewlyCreated={card.id === newlyCreatedCardId}
                   />
                 ))}
               </SortableContext>
