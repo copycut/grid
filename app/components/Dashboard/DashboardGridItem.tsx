@@ -60,7 +60,8 @@ export default function DashboardGridItem({
       <Card
         className="group-hover:border-primary-500!"
         title={
-          <div className="flex items-center space-x-2 group-hover:text-primary-500 transition-colors truncate">
+          <div className="flex items-center space-x-2 group-hover:text-primary-500 group-hover:dark:text-primary-400 transition-colors truncate">
+            <div className={`w-4 h-4 rounded-full capitalize ${board.background_color}`}></div>
             <span>{board.title}</span>
             <Tag className={`text-primary-400! ${!isNewBoard && 'hidden'}`}>New</Tag>
           </div>

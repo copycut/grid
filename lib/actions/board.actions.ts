@@ -7,7 +7,7 @@ import { boardService } from '@/lib/services/board.service'
 import { boardDataService } from '@/lib/services/board-data.service'
 import { Board } from '@/lib/supabase/models'
 
-export async function createBoard(title: string, createDefaultColumns: boolean = false) {
+export async function createBoard(title: string, background_color: string, createDefaultColumns: boolean = false) {
   const { userId } = await auth()
 
   if (!userId) {
@@ -22,9 +22,17 @@ export async function createBoard(title: string, createDefaultColumns: boolean =
 
   let result
   if (createDefaultColumns) {
-    result = await boardDataService.createBoardWithDefaultColumns(supabase, { title: title.trim(), user_id: userId })
+    result = await boardDataService.createBoardWithDefaultColumns(supabase, {
+      title: title.trim(),
+      user_id: userId,
+      background_color
+    })
   } else {
-    result = await boardDataService.createBoardWithoutColumns(supabase, { title: title.trim(), user_id: userId })
+    result = await boardDataService.createBoardWithoutColumns(supabase, {
+      title: title.trim(),
+      user_id: userId,
+      background_color
+    })
   }
 
   revalidatePath('/dashboard')

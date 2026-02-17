@@ -7,6 +7,7 @@ export interface Board {
   created_at: string
   updated_at: string
   is_favorite?: boolean
+  background_color?: string | null
 }
 
 export interface Column {

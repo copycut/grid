@@ -30,6 +30,7 @@ export default function DashboardListItem({
                   <StarOutlined className="text-primary!" />
                 )}
               </Button>
+              <div className={`w-4 h-4 rounded-full capitalize ${board.background_color}`}></div>
               <div className="group-hover:text-primary-500 transition-colors font-bold text-xl">{board.title}</div>
             </div>
 

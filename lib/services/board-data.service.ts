@@ -24,12 +24,16 @@ export const boardDataService = {
     return { board, columns: columnsWithCards }
   },
 
-  async createBoardWithoutColumns(supabase: SupabaseClient, boardData: { title: string; user_id: string }) {
+  async createBoardWithoutColumns(
+    supabase: SupabaseClient,
+    boardData: { title: string; user_id: string; background_color: string }
+  ) {
     const board = await boardService.createBoard(
       supabase,
       {
         title: boardData.title,
-        user_id: boardData.user_id
+        user_id: boardData.user_id,
+        background_color: boardData.background_color
       },
       boardData.user_id
     )
@@ -37,12 +41,16 @@ export const boardDataService = {
     return { board, columns: [] }
   },
 
-  async createBoardWithDefaultColumns(supabase: SupabaseClient, boardData: { title: string; user_id: string }) {
+  async createBoardWithDefaultColumns(
+    supabase: SupabaseClient,
+    boardData: { title: string; user_id: string; background_color: string }
+  ) {
     const board = await boardService.createBoard(
       supabase,
       {
         title: boardData.title,
-        user_id: boardData.user_id
+        user_id: boardData.user_id,
+        background_color: boardData.background_color
       },
       boardData.user_id
     )
@@ -70,4 +78,3 @@ export const boardDataService = {
     return { board, columns }
   }
 }
-

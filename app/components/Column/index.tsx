@@ -59,7 +59,7 @@ export default function Column({
         {/* Column footer */}
         <div className="p-2">
           <Button
-            className="w-full opacity-50 hover:opacity-100 transitions-opacity"
+            className="w-full opacity-70 hover:opacity-100 transitions-opacity"
             type="text"
             onClick={onCreateCard}
           >

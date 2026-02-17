@@ -26,6 +26,7 @@ import {
 } from '@/lib/actions/card.actions'
 import NavBar from '@/app/components/NavBar'
 import BoardHeader from '@/app/components/Board/BoardHeader'
+import { cn } from '@/lib/classnames'
 
 const BoardContent = dynamic(() => import('./BoardContent'), { ssr: false })
 const BoardEditionModal = dynamic(() => import('@/app/components/Board/BoardEditionModal'), { ssr: false })
@@ -54,16 +55,19 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
   const { optimisticColumns, updateOptimisticColumns } = useOptimisticColumns(columns)
   const { notifySuccess, notifyError } = useNotification()
 
-  const handleUpdateBoard = async (title: string) => {
+  const handleUpdateBoard = async (title: string, background_color: string) => {
     if (!board || !title.trim()) return
 
-    if (board.title === title.trim()) {
+    if (board.title === title.trim() && board.background_color === background_color) {
       setIsBoardEditing(false)
       return
     }
 
     try {
-      const updatedBoard = await updateBoardAction(board.id, { title: title.trim() })
+      const updatedBoard = await updateBoardAction(board.id, {
+        title: title.trim(),
+        background_color
+      })
       setBoard(updatedBoard)
       notifySuccess('Board updated successfully')
       setIsBoardEditing(false)
@@ -364,9 +368,15 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
     }
   }
 
+  const boardBackground = cn(
+    board?.background_color
+      ? board?.background_color
+      : 'bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-gray-950 dark:to-purple-950'
+  )
+
   return (
-    <div className="bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-gray-950 dark:to-purple-950">
-      <div className="min-h-screen dark:bg-gray-900/70">
+    <div id="board" className={boardBackground}>
+      <div className="min-h-screen bg-linear-to-br from-black/50 to-transparent">
         <NavBar
           boardTitle={board?.title}
           isFavorite={board?.is_favorite}
@@ -428,7 +438,7 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
         isOpen={isBoardEditing}
         board={board}
         onClose={() => setIsBoardEditing(false)}
-        onSubmit={(title) => handleUpdateBoard(title)}
+        onSubmit={(title, background_color) => handleUpdateBoard(title, background_color)}
       />
 
       <BoardFiltersModal

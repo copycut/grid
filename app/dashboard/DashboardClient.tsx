@@ -75,13 +75,13 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
     setIsBoardModalOpen(true)
   }
 
-  const handleBoardSubmit = async (title: string, createDefaultColumns: boolean) => {
+  const handleBoardSubmit = async (title: string, backgroundColor: string, createDefaultColumns: boolean) => {
     if (!title.trim()) return
 
     if (boardToEdit) {
       // Update existing board
 
-      if (boardToEdit.title === title.trim()) {
+      if (boardToEdit.title === title.trim() && boardToEdit.background_color === backgroundColor) {
         setIsBoardModalOpen(false)
         setBoardToEdit(null)
         return
@@ -89,11 +89,11 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
 
       try {
         setIsBoardModalOpen(false)
-        await updateBoardAction(boardToEdit.id, { title: title.trim() })
+        await updateBoardAction(boardToEdit.id, { title: title.trim(), background_color: backgroundColor })
         setBoards((prev) =>
           prev.map((board) => {
             if (board.id === boardToEdit.id) {
-              return { ...board, title: title.trim() }
+              return { ...board, title: title.trim(), background_color: backgroundColor }
             }
             return board
           })
@@ -113,7 +113,8 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
         user_id: user?.id || '',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        is_favorite: false
+        is_favorite: false,
+        background_color: null
       }
 
       startTransition(() => {
@@ -122,7 +123,7 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
 
       try {
         setIsBoardModalOpen(false)
-        await createBoardAction(title.trim(), createDefaultColumns)
+        await createBoardAction(title.trim(), backgroundColor, createDefaultColumns)
         setBoards((prev) => [...prev, optimisticBoard])
         notifySuccess('Board created successfully')
       } catch (error) {

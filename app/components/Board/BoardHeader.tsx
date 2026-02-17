@@ -22,14 +22,14 @@ export default function BoardHeader({
   return (
     <div className="flex items-center justify-between gap-2 pb-6 px-4">
       <div className="flex flex-wrap items-center gap-4 sm:gap-6 pb-2">
-        <div className="text-sm text-gray-600 dark:text-white/50">
+        <div className="text-sm text-gray-600 dark:text-white/70">
           <h2 className="inline font-medium">Total cards: </h2>
           {filterCount > 0 && <span>{filteredCardsCount}/</span>}
           <span>{totalCardsCount}</span>
         </div>
 
         {filterCount > 0 && (
-          <div className="flex items-center flex-wrap gap-2 text-sm text-gray-600 dark:text-white/50">
+          <div className="flex items-center flex-wrap gap-2 text-sm text-gray-600 dark:text-white/70">
             <span className="font-medium">Filters:</span>
             {filters.priority?.map((priority) => (
               <Tag key={priority} color={filterOptions.priority.find((option) => option.value === priority)?.color}>

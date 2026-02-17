@@ -1,10 +1,11 @@
 import { Board } from '@/lib/supabase/models'
-import { Button, Checkbox, Form, Input, InputRef, Modal } from 'antd'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { useEscapeKey } from '@/lib/hooks/useEscapeKey'
 import { useDeviceDetection } from '@/lib/hooks/useDeviceDetection'
+import { Button, Checkbox, Form, Input, InputRef, Modal } from 'antd'
 import ShortcutIndicator from '@/app/components/ui/ShortcutIndicator'
+import BoardColorList from '@/app/components/Board/BoardColorList'
 
 export default function BoardEditionModal({
   isOpen,
@@ -15,10 +16,10 @@ export default function BoardEditionModal({
   isOpen: boolean
   board: Board | null
   onClose: () => void
-  onSubmit: (title: string, createDefaultColumns: boolean) => void
+  onSubmit: (title: string, background_color: string, createDefaultColumns: boolean) => void
 }) {
   const [form] = Form.useForm()
-  const [title, setTitle] = useState(board?.title || '')
+  const [backgroundColor, setBackgroundColor] = useState(board?.background_color || 'bg-indigo-500')
   const [createDefaultColumns, setCreateDefaultColumns] = useState(true)
   const titleInputRef = useRef<InputRef>(null)
   const isEditMode = !!board
@@ -29,7 +30,7 @@ export default function BoardEditionModal({
       setTimeout(() => titleInputRef.current?.focus(), 0)
 
       if (board) {
-        form.setFieldsValue({ title: board.title })
+        form.setFieldsValue({ title: board.title, background_color: board.background_color })
       } else {
         form.resetFields()
         form.setFieldsValue({ createDefaultColumns: true })
@@ -39,8 +40,10 @@ export default function BoardEditionModal({
 
   const handleSubmit = () => {
     form.validateFields().then(() => {
-      if (!title.trim()) return
-      onSubmit(title, createDefaultColumns)
+      const title = form.getFieldValue('title')
+      const backgroundColor = form.getFieldValue('background_color')
+      const createDefaultColumns = form.getFieldValue('createDefaultColumns')
+      onSubmit(title, backgroundColor, createDefaultColumns)
     })
   }
 
@@ -80,8 +83,13 @@ export default function BoardEditionModal({
           validateFirst
           rules={[{ whitespace: true, required: true }]}
         >
-          <Input ref={titleInputRef} type="text" onChange={(e) => setTitle(e.target.value)} />
+          <Input ref={titleInputRef} type="text" />
         </Form.Item>
+
+        <Form.Item label="Board color" name="background_color">
+          <BoardColorList value={backgroundColor} onChange={(color) => setBackgroundColor(color)} />
+        </Form.Item>
+
         {!isEditMode && (
           <Form.Item name="createDefaultColumns" valuePropName="checked">
             <Checkbox checked={createDefaultColumns} onChange={(e) => setCreateDefaultColumns(e.target.checked)}>
