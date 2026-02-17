@@ -29,8 +29,8 @@ export default function NavBarTitle({
   ) : (
     <div className="flex flex-1 min-w-0 items-center text-primary">
       <Link href="/dashboard" className="flex items-center shrink-0 text-sm gap-2 pr-4 group">
-        <ArrowLeftOutlined className="text-lg text-primary-400! group-hover:text-primary-900! dark:group-hover:text-primary-300! transition-colors" />
-        <span className="hidden sm:inline font-medium text-primary-400 group-hover:text-primary-900 dark:group-hover:text-primary-300 transition-colors">
+        <ArrowLeftOutlined className="text-lg text-gray-800! dark:text-gray-400! group-hover:text-primary-900! dark:group-hover:text-primary-300! transition-colors" />
+        <span className="hidden sm:inline font-medium text-gray-800 dark:text-gray-400 group-hover:text-primary-900 dark:group-hover:text-primary-300 transition-colors">
           Back to dashboard
         </span>
       </Link>

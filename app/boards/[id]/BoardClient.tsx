@@ -24,9 +24,9 @@ import {
   updateCard as updateCardAction,
   deleteCard as deleteCardAction
 } from '@/lib/actions/card.actions'
+import { cn } from '@/lib/classnames'
 import NavBar from '@/app/components/NavBar'
 import BoardHeader from '@/app/components/Board/BoardHeader'
-import { cn } from '@/lib/classnames'
 
 const BoardContent = dynamic(() => import('./BoardContent'), { ssr: false })
 const BoardEditionModal = dynamic(() => import('@/app/components/Board/BoardEditionModal'), { ssr: false })
@@ -86,50 +86,12 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
   }
 
   const filteredColumns = useMemo(() => {
-    const seenColumns = new Map<string, OptimisticColumn>()
-    const uniqueColumns = (optimisticColumns as OptimisticColumn[]).filter((column) => {
-      const key = `${column.title}-${column.board_id}`
-      if (seenColumns.has(key)) {
-        const existing = seenColumns.get(key)!
-        if (column.isOptimistic) {
-          return false
-        }
-        if (existing.isOptimistic) {
-          seenColumns.set(key, column)
-          return true
-        }
-        return false
-      }
-      seenColumns.set(key, column)
-      return true
-    })
-
-    const deduplicatedColumns = uniqueColumns.map((column) => {
-      const seenCards = new Map<string, OptimisticCard>()
-      const uniqueCards = (column.cards as OptimisticCard[]).filter((card) => {
-        const key = `${card.title}-${card.description}-${card.priority}-${card.column_id}`
-        if (seenCards.has(key)) {
-          const existing = seenCards.get(key)!
-          if (card.isOptimistic) {
-            return false
-          }
-          if (existing.isOptimistic) {
-            seenCards.set(key, card)
-            return true
-          }
-          return false
-        }
-        seenCards.set(key, card)
-        return true
-      })
-      return { ...column, cards: uniqueCards }
-    })
-
+    // Apply priority filter if set
     if (!filters.priority || filters.priority.length === 0) {
-      return deduplicatedColumns
+      return optimisticColumns
     }
 
-    return deduplicatedColumns.map((column) => ({
+    return optimisticColumns.map((column) => ({
       ...column,
       cards: column.cards.filter((card) => filters.priority?.includes(card.priority))
     }))
@@ -173,7 +135,7 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
   const handleCreateColumn = async (title: string) => {
     if (!title) return
 
-    const tempId = Date.now()
+    const tempId = -Date.now()
     const optimisticColumn: OptimisticColumn = {
       id: tempId,
       title,
@@ -246,7 +208,7 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
   const handleCreateCard = async (newCard: NewCard, columnId: number) => {
     if (!newCard.title.trim()) return
 
-    const tempId = Date.now()
+    const tempId = -Date.now()
     const optimisticCard: OptimisticCard = {
       id: tempId,
       title: newCard.title.trim(),
@@ -371,12 +333,12 @@ export default function BoardClient({ initialBoard, initialColumns, boardId }: B
   const boardBackground = cn(
     board?.background_color
       ? board?.background_color
-      : 'bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-gray-950 dark:to-purple-950'
+      : 'bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900 dark:via-indigo-900 dark:to-purple-900'
   )
 
   return (
     <div id="board" className={boardBackground}>
-      <div className="min-h-screen bg-linear-to-br from-black/50 to-transparent">
+      <div className="min-h-screen bg-linear-to-br from-white/10 dark:from-black/50 to-transparent">
         <NavBar
           boardTitle={board?.title}
           isFavorite={board?.is_favorite}

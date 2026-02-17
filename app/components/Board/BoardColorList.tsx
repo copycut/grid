@@ -1,16 +1,23 @@
 import { Select } from 'antd'
+import type { ReactNode } from 'react'
 
-function ColorLabel({ color }: { color: string }) {
+function ColorLabel({ color, label }: { color?: string; label: string }) {
+  const defaultColor =
+    'border border-gray-300 dark:border-gray-700 bg-linear-to-br from-blue-90 to-purple-50 dark:from-blue-900 dark:to-purple-500'
+
   return (
-    <div className="flex items-center gap-2">
-      <div className={`w-4 h-4 rounded-full ${color}`}></div>
-      <span className="capitalize">{color.replace('bg-', '').replace('-500', ' ')}</span>
+    <div className="flex items-center gap-2" key={color || 'no-color'}>
+      <div className={`w-4 h-4 rounded-full ${color || defaultColor}`} />
+      <span className="capitalize">{label}</span>
     </div>
   )
 }
 
-function SelectedColor({ value }: { label: React.ReactNode; value: string | number }) {
-  return <ColorLabel color={String(value)} />
+function SelectedColor(props: { value: string | number; label: ReactNode }) {
+  const colorValue = String(props.value || '')
+  const labelText = colorValue.replace('bg-', '').replace('-500', ' ')
+
+  return <ColorLabel color={colorValue === 'default' ? undefined : colorValue} label={labelText} />
 }
 
 export default function BoardColorList({ value, onChange }: { value?: string; onChange: (color: string) => void }) {
@@ -38,17 +45,27 @@ export default function BoardColorList({ value, onChange }: { value?: string; on
     'bg-stone-500'
   ]
 
-  const options = colorList.map((color) => ({
-    value: color,
-    label: <ColorLabel color={color} />
-  }))
+  const options = [
+    {
+      value: 'default',
+      label: <ColorLabel label="Default" />,
+      key: 'no-color'
+    },
+    ...colorList.map((color) => ({
+      value: color,
+      label: <ColorLabel color={color} label={color.replace('bg-', '').replace('-500', ' ')} />
+    }))
+  ]
+
+  function handleChange(color: string) {
+    onChange(color === 'default' ? '' : color)
+  }
 
   return (
     <Select
-      value={value}
-      onChange={onChange}
+      value={value || 'default'}
+      onChange={handleChange}
       options={options}
-      defaultValue="bg-indigo-500"
       labelRender={SelectedColor}
       className="w-full"
       placeholder="Select a color"

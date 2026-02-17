@@ -8,6 +8,7 @@ export interface Board {
   updated_at: string
   is_favorite?: boolean
   background_color?: string | null
+  is_archived?: boolean
 }
 
 export interface Column {
@@ -33,3 +34,4 @@ export type ColumnWithCards = Column & { cards: Card[] }
 
 export type OptimisticCard = Card & { isOptimistic?: boolean }
 export type OptimisticColumn = ColumnWithCards & { isOptimistic?: boolean; cards: OptimisticCard[] }
+export type OptimisticBoard = Board & { isOptimistic?: boolean }

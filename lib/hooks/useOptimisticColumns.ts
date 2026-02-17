@@ -1,5 +1,6 @@
-import { useOptimistic } from 'react'
-import { Card as CardType, Column as ColumnType, ColumnWithCards } from '@/lib/supabase/models'
+import { useOptimistic, useMemo } from 'react'
+import { Card as CardType, Column as ColumnType, ColumnWithCards, OptimisticColumn } from '@/lib/supabase/models'
+import { deduplicateOptimisticItems } from '@/lib/utils/deduplication'
 
 export function useOptimisticColumns(columns: ColumnWithCards[]) {
   const [optimisticColumns, updateOptimisticColumns] = useOptimistic(
@@ -70,5 +71,19 @@ export function useOptimisticColumns(columns: ColumnWithCards[]) {
     }
   )
 
-  return { optimisticColumns, updateOptimisticColumns }
+  const deduplicatedColumns = useMemo(() => {
+    const deduplicatedCols = deduplicateOptimisticItems(optimisticColumns as OptimisticColumn[], {
+      getKey: (column) => `${column.title}-${column.board_id}`
+    })
+
+    return deduplicatedCols.map((column) => {
+      const deduplicatedCards = deduplicateOptimisticItems(column.cards, {
+        getKey: (card) => `${card.title}-${card.description}-${card.priority}-${card.column_id}`
+      })
+
+      return { ...column, cards: deduplicatedCards }
+    })
+  }, [optimisticColumns])
+
+  return { optimisticColumns: deduplicatedColumns, updateOptimisticColumns }
 }

@@ -1,5 +1,6 @@
-import { useOptimistic } from 'react'
-import { Board } from '@/lib/supabase/models'
+import { useOptimistic, useMemo } from 'react'
+import { Board, OptimisticBoard } from '@/lib/supabase/models'
+import { deduplicateOptimisticItems } from '@/lib/utils/deduplication'
 
 export function useOptimisticBoards(boards: Board[]) {
   const [optimisticBoards, updateOptimisticBoards] = useOptimistic(
@@ -8,7 +9,7 @@ export function useOptimisticBoards(boards: Board[]) {
       currentBoards: Board[],
       action: {
         type: 'create' | 'delete' | 'update'
-        board?: Board
+        board?: OptimisticBoard
         boardId?: number
         updates?: Partial<Board>
       }
@@ -29,5 +30,11 @@ export function useOptimisticBoards(boards: Board[]) {
     }
   )
 
-  return { optimisticBoards, updateOptimisticBoards }
+  const deduplicatedBoards = useMemo(() => {
+    return deduplicateOptimisticItems(optimisticBoards as OptimisticBoard[], {
+      getKey: (board) => `${board.title}-${board.background_color || 'null'}`
+    })
+  }, [optimisticBoards])
+
+  return { optimisticBoards: deduplicatedBoards, updateOptimisticBoards }
 }

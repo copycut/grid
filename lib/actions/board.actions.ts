@@ -57,6 +57,38 @@ export async function updateBoard(boardId: number, updates: Partial<Board>) {
   return board
 }
 
+export async function archiveBoard(boardId: number) {
+  const { userId } = await auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  const supabase = await createClient()
+
+  const board = await boardService.updateBoard(supabase, boardId, { is_archived: true }, userId)
+
+  revalidatePath('/dashboard')
+
+  return board
+}
+
+export async function unarchiveBoard(boardId: number) {
+  const { userId } = await auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  const supabase = await createClient()
+
+  const board = await boardService.updateBoard(supabase, boardId, { is_archived: false }, userId)
+
+  revalidatePath('/dashboard')
+
+  return board
+}
+
 export async function deleteBoard(boardId: number) {
   const { userId } = await auth()
 

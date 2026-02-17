@@ -1,15 +1,11 @@
-import { BorderHorizontalOutlined, BorderVerticleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { Button, Input } from 'antd'
 
 export default function DashboardFilters({
-  viewMode,
-  setViewMode,
   handleCreateBoard,
   searchQuery,
   onSearch
 }: {
-  viewMode: 'grid' | 'list'
-  setViewMode: (viewMode: 'grid' | 'list') => void
   handleCreateBoard: () => void
   searchQuery: string
   onSearch: (query: string) => void
@@ -36,24 +32,6 @@ export default function DashboardFilters({
           />
         </div>
 
-        <div className="hidden sm:flex items-center p-1 rounded-xl border border-gray-300 dark:border-gray-700">
-          <Button
-            variant={viewMode === 'grid' ? 'solid' : 'filled'}
-            color="primary"
-            size="small"
-            onClick={() => setViewMode('grid')}
-          >
-            <BorderHorizontalOutlined />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'solid' : 'filled'}
-            color="primary"
-            size="small"
-            onClick={() => setViewMode('list')}
-          >
-            <BorderVerticleOutlined />
-          </Button>
-        </div>
         <Button type="primary" onClick={handleCreateBoard}>
           <PlusOutlined />
           Create Board

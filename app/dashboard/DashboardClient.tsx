@@ -5,18 +5,20 @@ import dynamic from 'next/dynamic'
 import { useUser } from '@clerk/clerk-react'
 import { useOptimisticBoards } from '@/lib/hooks/useOptimisticBoards'
 import { useNotification } from '@/lib/utils/notifications'
-import { Board } from '@/lib/supabase/models'
+import { Board, OptimisticBoard } from '@/lib/supabase/models'
 import {
   createBoard as createBoardAction,
   updateBoard as updateBoardAction,
-  deleteBoard as deleteBoardAction
+  deleteBoard as deleteBoardAction,
+  archiveBoard as archiveBoardAction,
+  unarchiveBoard as unarchiveBoardAction
 } from '@/lib/actions/board.actions'
 import NavBar from '@/app/components/NavBar'
 import DashboardTopCards from '@/app/components/Dashboard/DashboardTopCards'
 import DashboardFilters from '@/app/components/Dashboard/DashboardFilters'
 import DashboardCreateBoard from '@/app/components/Dashboard/DashboardCreateBoard'
 import DashboardGridItem from '@/app/components/Dashboard/DashboardGridItem'
-import DashboardListItem from '@/app/components/Dashboard/DashboardListItem'
+import { Button } from 'antd'
 
 const BoardDeleteModal = dynamic(() => import('@/app/components/Board/BoardDeleteModal'), { ssr: false })
 const BoardEditionModal = dynamic(() => import('@/app/components/Board/BoardEditionModal'), { ssr: false })
@@ -25,15 +27,18 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
   const { user } = useUser()
   const [boards, setBoards] = useState(initialBoards)
   const { optimisticBoards, updateOptimisticBoards } = useOptimisticBoards(boards)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
+  const [showArchivedBoards, setShowArchivedBoards] = useState(false)
   const [isBoardDeletion, setIsBoardDeletion] = useState(false)
   const [boardIdToDelete, setBoardIdToDelete] = useState<number | null>(null)
   const [isBoardModalOpen, setIsBoardModalOpen] = useState(false)
   const [boardToEdit, setBoardToEdit] = useState<Board | null>(null)
   const { notifySuccess, notifyError } = useNotification()
 
-  const filteredBoards = optimisticBoards
+  const activeBoards = optimisticBoards.filter((board) => !board.is_archived)
+  const archivedBoards = optimisticBoards.filter((board) => board.is_archived)
+
+  const filteredBoards = activeBoards
     .filter((board) => board.title.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
       // Sort by favorite first (true before false), then by creation date (newest first)
@@ -42,6 +47,10 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
       }
       return a.is_favorite ? -1 : 1
     })
+
+  const sortedArchivedBoards = archivedBoards.sort(
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  )
 
   const handleBoardToDeleteModal = (boardID: number) => {
     setBoardIdToDelete(boardID)
@@ -106,15 +115,16 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
       }
     } else {
       // Create new board
-      const tempId = Date.now()
-      const optimisticBoard = {
+      const tempId = -Date.now()
+      const optimisticBoard: OptimisticBoard = {
         id: tempId,
         title: title.trim(),
         user_id: user?.id || '',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         is_favorite: false,
-        background_color: null
+        background_color: backgroundColor,
+        isOptimistic: true
       }
 
       startTransition(() => {
@@ -123,12 +133,68 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
 
       try {
         setIsBoardModalOpen(false)
-        await createBoardAction(title.trim(), backgroundColor, createDefaultColumns)
-        setBoards((prev) => [...prev, optimisticBoard])
+        const createdBoard = await createBoardAction(title.trim(), backgroundColor, createDefaultColumns)
+        setBoards((prev) => [...prev, createdBoard])
         notifySuccess('Board created successfully')
       } catch (error) {
         notifyError('Failed to create board', 'Please try again', error)
       }
+    }
+  }
+
+  const handleArchiveBoard = async (boardId: number) => {
+    const board = boards.find((board) => board.id === boardId)
+    if (!board) return
+
+    startTransition(() => {
+      updateOptimisticBoards({
+        type: 'update',
+        boardId,
+        updates: { is_archived: true }
+      })
+    })
+
+    try {
+      await archiveBoardAction(boardId)
+      setBoards((prev) =>
+        prev.map((b) => {
+          if (b.id === boardId) {
+            return { ...b, is_archived: true }
+          }
+          return b
+        })
+      )
+      notifySuccess('Board archived successfully')
+    } catch (error) {
+      notifyError('Failed to archive board', 'Please try again', error)
+    }
+  }
+
+  const handleUnarchiveBoard = async (boardId: number) => {
+    const board = boards.find((board) => board.id === boardId)
+    if (!board) return
+
+    startTransition(() => {
+      updateOptimisticBoards({
+        type: 'update',
+        boardId,
+        updates: { is_archived: false }
+      })
+    })
+
+    try {
+      await unarchiveBoardAction(boardId)
+      setBoards((prev) =>
+        prev.map((prevBoard) => {
+          if (prevBoard.id === boardId) {
+            return { ...prevBoard, is_archived: false }
+          }
+          return prevBoard
+        })
+      )
+      notifySuccess('Board is unarchive successfully')
+    } catch (error) {
+      notifyError('Failed to unarchive board', 'Please try again', error)
     }
   }
 
@@ -174,13 +240,7 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
         <DashboardTopCards boards={optimisticBoards} />
 
         <div className="pb-6 sm:pb-8">
-          <DashboardFilters
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            handleCreateBoard={handleCreateBoard}
-            searchQuery={searchQuery}
-            onSearch={setSearchQuery}
-          />
+          <DashboardFilters handleCreateBoard={handleCreateBoard} searchQuery={searchQuery} onSearch={setSearchQuery} />
 
           {filteredBoards.length < 1 && (
             <div className="text-center text-gray-500 dark:text-gray-400">
@@ -188,26 +248,47 @@ export default function DashboardClient({ initialBoards }: { initialBoards: Boar
             </div>
           )}
 
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
-              {filteredBoards.map((board) => (
-                <DashboardGridItem
-                  key={board.id}
-                  board={board}
-                  onToggleFavorite={handleToggleFavorite}
-                  onEditBoard={handleEditBoardModal}
-                  onDeleteBoard={handleBoardToDeleteModal}
-                />
-              ))}
-              <DashboardCreateBoard isGrid={true} handleCreateBoard={handleCreateBoard} />
-            </div>
-          ) : (
-            <div className="flex flex-col space-y-2 w-full">
-              {filteredBoards.map((board) => (
-                <DashboardListItem key={board.id} board={board} onToggleFavorite={handleToggleFavorite} />
-              ))}
-              <DashboardCreateBoard isGrid={false} handleCreateBoard={handleCreateBoard} />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
+            {filteredBoards.map((board) => (
+              <DashboardGridItem
+                key={board.id}
+                board={board}
+                onToggleFavorite={handleToggleFavorite}
+                onEditBoard={handleEditBoardModal}
+                onArchiveBoard={handleArchiveBoard}
+                onDeleteBoard={handleBoardToDeleteModal}
+              />
+            ))}
+            <DashboardCreateBoard isGrid={true} handleCreateBoard={handleCreateBoard} />
+          </div>
+
+          {sortedArchivedBoards.length > 0 && (
+            <>
+              <div className="py-6 sm:py-8 flex items-center justify-between">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-300 m-0">
+                  Archived Boards ({sortedArchivedBoards.length})
+                </h2>
+
+                <Button type="text" onClick={() => setShowArchivedBoards(!showArchivedBoards)}>
+                  {showArchivedBoards ? 'Hide' : 'Show'} Archived Boards
+                </Button>
+              </div>
+
+              {showArchivedBoards && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
+                  {sortedArchivedBoards.map((board) => (
+                    <DashboardGridItem
+                      key={board.id}
+                      board={board}
+                      onToggleFavorite={handleToggleFavorite}
+                      onEditBoard={handleEditBoardModal}
+                      onArchiveBoard={handleUnarchiveBoard}
+                      onDeleteBoard={handleBoardToDeleteModal}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

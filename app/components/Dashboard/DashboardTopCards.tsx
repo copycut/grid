@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Card } from 'antd'
-import { ProjectFilled, RocketFilled, StarFilled } from '@ant-design/icons'
+import { FolderFilled, ProjectFilled, RocketFilled, StarFilled } from '@ant-design/icons'
 import { Board } from '@/lib/supabase/models'
 import { cn } from '@/lib/classnames'
 
 export default function DashboardTopCards({ boards }: { boards: Board[] }) {
   const [now] = useState(() => Date.now())
-  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000
+  const oneDayAgo = now - 1 * 24 * 60 * 60 * 1000
 
   const cardContent = [
     {
@@ -20,7 +20,7 @@ export default function DashboardTopCards({ boards }: { boards: Board[] }) {
       icon: RocketFilled,
       colorClasses: 'bg-green-200 dark:bg-green-900 text-green-700 dark:text-green-500',
       value: boards.filter((board) => {
-        return new Date(board.updated_at).getTime() > sevenDaysAgo
+        return new Date(board.updated_at).getTime() > oneDayAgo
       }).length
     },
     {
@@ -28,6 +28,12 @@ export default function DashboardTopCards({ boards }: { boards: Board[] }) {
       icon: StarFilled,
       colorClasses: 'bg-yellow-200 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-500',
       value: boards.filter((board) => board.is_favorite).length
+    },
+    {
+      title: 'Archived Boards',
+      icon: FolderFilled,
+      colorClasses: 'bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-500',
+      value: boards.filter((board) => board.is_archived).length
     }
   ]
 

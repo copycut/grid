@@ -28,13 +28,13 @@ export default function Column({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1
+    opacity: isDragging ? 0.9 : 1
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="w-full lg:shrink-0 lg:w-80">
+    <div ref={setNodeRef} style={style} className="w-full lg:shrink-0 lg:w-80 select-none pt-1">
       <div
-        className={`${isOver ? 'ring-2 ring-primary-500' : ''} bg-white dark:bg-black rounded-2xl shadow-sm border border-gray-300 dark:border-gray-700 transition-all`}
+        className={`${isOver ? 'ring-2 ring-primary-500 bg-white! dark:bg-black!' : ''} bg-white/90 dark:bg-black/60 rounded-2xl shadow-sm border border-gray-300 dark:border-gray-700 transition-all`}
       >
         {/* Column header - draggable */}
         <div className="p-3 sm:p-4 border-b border-b-gray-300 dark:border-b-neutral-700">

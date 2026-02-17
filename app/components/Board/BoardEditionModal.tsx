@@ -19,7 +19,7 @@ export default function BoardEditionModal({
   onSubmit: (title: string, background_color: string, createDefaultColumns: boolean) => void
 }) {
   const [form] = Form.useForm()
-  const [backgroundColor, setBackgroundColor] = useState(board?.background_color || 'bg-indigo-500')
+  const [backgroundColor, setBackgroundColor] = useState(board?.background_color || 'none')
   const [createDefaultColumns, setCreateDefaultColumns] = useState(true)
   const titleInputRef = useRef<InputRef>(null)
   const isEditMode = !!board
