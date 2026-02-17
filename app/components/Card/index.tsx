@@ -29,7 +29,7 @@ export default function Card({
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border cursor-pointer hover:shadow-lg transition-all duration-500 ${
+      className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border cursor-pointer hover:shadow-lg hover:border-primary-500 transition-all duration-500 ${
         isNewlyCreated
           ? 'border-yellow-400 shadow-yellow-200 dark:shadow-yellow-900/50 shadow-lg'
           : 'border-gray-300 dark:border-neutral-700'
