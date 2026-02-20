@@ -65,31 +65,34 @@ export function useDragAndDrop(
 
     // Handle column reordering
     if (activeColumn) {
-      const activeIndex = columns.findIndex((col) => col.id === activeId)
-      const overIndex = columns.findIndex((col) => col.id === overId)
+      setColumns((prev) => {
+        const activeIndex = prev.findIndex((col) => col.id === activeId)
+        let overIndex = prev.findIndex((col) => col.id === overId)
 
-      if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
-        // Store the final position BEFORE updating state
-        const simulatedColumns = [...columns]
-        const [movedColumn] = simulatedColumns.splice(activeIndex, 1)
-        simulatedColumns.splice(overIndex, 0, movedColumn)
-        const finalPosition = simulatedColumns.findIndex((col) => col.id === activeId)
+        // If overId is a card (not a column), resolve to its parent column
+        if (overIndex === -1) {
+          overIndex = prev.findIndex((col) => col.cards.some((card) => card.id === overId))
+        }
 
+        if (activeIndex === -1 || overIndex === -1 || activeIndex === overIndex) {
+          return prev
+        }
+
+        const newColumns = [...prev]
+        const [movedColumn] = newColumns.splice(activeIndex, 1)
+        newColumns.splice(overIndex, 0, movedColumn)
+
+        // Update positions
+        newColumns.forEach((col, index) => {
+          col.position = index
+        })
+
+        // Store the final position from the actual current state
+        const finalPosition = newColumns.findIndex((col) => col.id === activeId)
         dragEndInfoRef.current = { columnId: activeId as number, position: finalPosition }
 
-        setColumns((prev) => {
-          const newColumns = [...prev]
-          const [movedColumn] = newColumns.splice(activeIndex, 1)
-          newColumns.splice(overIndex, 0, movedColumn)
-
-          // Update positions
-          newColumns.forEach((col, index) => {
-            col.position = index
-          })
-
-          return newColumns
-        })
-      }
+        return newColumns
+      })
       return
     }
 
